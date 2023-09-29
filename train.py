@@ -118,9 +118,7 @@ class Trainer():
         raise Exception("not implemented")
 
       if dist.is_initialized():
-        self.model_wind = DistributedDataParallel(self.model_wind,
-                                            device_ids=[params.local_rank],
-                                            output_device=[params.local_rank],find_unused_parameters=True)
+        self.model_wind = DistributedDataParallel(self.model_wind,device_ids=[params.local_rank], output_device=[params.local_rank],find_unused_parameters=True)
       self.load_model_wind(params.model_wind_path)
       self.switch_off_grad(self.model_wind) # no backprop through the wind model
 
