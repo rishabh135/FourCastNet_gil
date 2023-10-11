@@ -33,13 +33,19 @@ full_field: &FULL_FIELD
   in_channels: [0,1]
   out_channels: [0,1] #must be same as in_channels if prediction_type == 'iterative'
   normalization: 'zscore' #options zscore (minmax not supported) 
-  train_data_path: '/pscratch/sd/j/jpathak/wind/train'
-  valid_data_path: '/pscratch/sd/j/jpathak/wind/test'
-  inf_data_path: '/pscratch/sd/j/jpathak/wind/out_of_sample' # test set path for inference
-  exp_dir: '/pscratch/sd/j/jpathak/ERA5_expts_gtc/wind'
-  time_means_path:   '/pscratch/sd/j/jpathak/wind/time_means.npy'
-  global_means_path: '/pscratch/sd/j/jpathak/wind/global_means.npy'
-  global_stds_path:  '/pscratch/sd/j/jpathak/wind/global_stds.npy'
+  
+
+  train_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/train/'
+  valid_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/test/'
+  inf_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample' # test set path for inference
+  time_means_path:   '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/time_means.npy'
+  global_means_path: '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_means.npy'
+  global_stds_path:  '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_stds.npy'
+  exp_dir: '/scratch/gilbreth/gupt1075/ERA5_expts_gtc/'
+  
+  
+
+
 
   orography: !!bool False
   orography_path: None
@@ -69,12 +75,12 @@ afno_backbone: &backbone
   in_channels: [0, 1 ,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   out_channels: [0, 1 ,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   
-  orography: !!bool True
+  orography: !!bool False
   orography_path: '/scratch/gilbreth/wwtung/FourCastNet/data/static/orography.h5'
   
   exp_dir: '/scratch/gilbreth/gupt1075/ERA5_expts_gtc/'
-  train_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/train'
-  valid_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/test'
+  train_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/train/'
+  valid_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/test/'
   inf_data_path: '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample' # test set path for inference
   time_means_path:   '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/time_means.npy'
   global_means_path: '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_means.npy'
@@ -116,7 +122,7 @@ perturbations:
   save_raw_forecasts: !!bool False
   date_strings: ["2018-01-01 00:00:00"] 
   inference_file_tag: " "
-  valid_data_path: "/pscratch/sd/j/jpathak/ "
+  valid_data_path: "/scratch/gilbreth/wwtung/FourCastNet/data/test/"
   perturb: !!bool True
   n_level: 0.3
 
