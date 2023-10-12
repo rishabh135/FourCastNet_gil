@@ -80,7 +80,9 @@ import glob
 from datetime import datetime
 from torchinfo import summary
 
-fld = "z500"  # diff flds have diff decor times and hence differnt ics
+# pressure geopotential height m2/second2    m
+fld = "u10"  # diff flds have diff decor times and hence differnt ics
+#  first row is smoother and easier to predict for the future frames
 if fld == "z500" or fld == "2m_temperature" or fld == "t850":
     DECORRELATION_TIME = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
 else:
@@ -470,6 +472,7 @@ if __name__ == "__main__":
         num_samples = n_samples_per_year - params.prediction_length
         stop = num_samples
         ics = np.arange(0, stop, DECORRELATION_TIME)
+        logging.warning(f" ICS: {ics} ")
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
         n_ics = len(ics)
@@ -529,9 +532,12 @@ if __name__ == "__main__":
         sr, sp, vl, a, au, vc, ac, acu, accland, accsea = autoregressive_inference(
             params, ic, valid_data_full, model
         )
-        with open('/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_pred_output.npy', 'wb') as f:
+        
+        
+        
+        with open(f'/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_pred_output_{i}.npy', 'wb') as f:
             np.save(f, np.squeeze(sp))
-        with open('/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_real_output.npy', 'wb') as f:
+        with open(f'/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_real_output_{i}.npy', 'wb') as f:
             np.save(f, np.squeeze(sr))            
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
         

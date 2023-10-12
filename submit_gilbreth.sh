@@ -68,7 +68,7 @@ python /scratch/gilbreth/gupt1075/FourCastNet/inference/inference.py \
        --config='afno_backbone' \
        --run_num='02' \
        --weights "/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt"  \
-       --override_dir '/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/' 
+       --override_dir '/scratch/gilbreth/gupt1075/ERA5_expts_u10/' 
 
 
 

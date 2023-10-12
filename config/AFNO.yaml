@@ -55,7 +55,7 @@ full_field: &FULL_FIELD
   save_checkpoint: !!bool True
 
   enable_nhwc: !!bool False
-  optimizer_type: 'FusedAdam'
+  optimizer_type: 'Adam'
   crop_size_x: None
   crop_size_y: None
 
@@ -90,7 +90,7 @@ afno_backbone: &backbone
   
 
   
-
+#  model uses orography more smoother, surface level temperature, the veritcal velocity using contuinuity equation on the surface!
 afno_backbone_orography: &backbone_orography 
   <<: *backbone
   orography: !!bool False
