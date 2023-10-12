@@ -32,6 +32,9 @@ export CUDA="11.7"
 
 echo $PYTHONPATH
 
+
+
+
 echo "Current date completed loading modules: $now"
 
 # track per-code GPU load
@@ -54,7 +57,6 @@ MEM_PID=$!
 
 
 
-
 # Loading anaconda environment
 source  /apps/spack/gilbreth/apps/anaconda/5.3.1-py37-gcc-4.8.5-7vvmykn/etc/profile.d/conda.sh
 conda activate pytorch
@@ -74,7 +76,7 @@ export NCCL_NET_GDR_LEVEL=PHB
 export MASTER_ADDR=$(hostname)
 
 set -x
-python /scratch/gilbreth/gupt1075/FourCastNet/submit_gilbreth.sh --enable_amp --yaml_config=$config_file --config=$config --run_num=$run_num
+python /scratch/gilbreth/gupt1075/FourCastNet/train.py --enable_amp --yaml_config=$config_file --config=$config --run_num=$run_num
 
 
 
