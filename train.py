@@ -110,7 +110,7 @@ class Trainer:
                 entity=params.entity,
             )
 
-        logging.info("rank %d, begin data loader init" % world_rank)
+        logging.warning("rank %d, begin data loader init" % world_rank)
         (
             self.train_data_loader,
             self.train_dataset,
@@ -122,7 +122,7 @@ class Trainer:
             params, params.valid_data_path, dist.is_initialized(), train=False
         )
         self.loss_obj = LpLoss()
-        logging.info("rank %d, data loader initialized" % world_rank)
+        logging.warning("rank %d, data loader initialized" % world_rank)
 
         params.crop_size_x = self.valid_dataset.crop_size_x
         params.crop_size_y = self.valid_dataset.crop_size_y
@@ -194,18 +194,18 @@ class Trainer:
         self.iters = 0
         self.startEpoch = 0
         if params.resuming:
-            logging.info(f"Loading checkpoint {params.checkpoint_path}")
+            logging.warning(f"Loading checkpoint {params.checkpoint_path}")
             self.restore_checkpoint(params.checkpoint_path)
         if params.two_step_training:
             if params.resuming == False and params.pretrained == True:
-                logging.info(
+                logging.warning(
                     f"Starting from pretrained one-step afno model at {params.pretrained_ckpt_path}"
                 )
                 self.restore_checkpoint(params.pretrained_ckpt_path)
                 self.iters = 0
                 self.startEpoch = 0
-                # logging.info("Pretrained checkpoint was trained for %d epochs"%self.startEpoch)
-                # logging.info("Adding %d epochs specified in config file for refining pretrained model"%self.params.max_epochs)
+                # logging.warning("Pretrained checkpoint was trained for %d epochs"%self.startEpoch)
+                # logging.warning("Adding %d epochs specified in config file for refining pretrained model"%self.params.max_epochs)
                 # self.params.max_epochs += self.startEpoch
 
         self.epoch = self.startEpoch
@@ -222,9 +222,9 @@ class Trainer:
             self.scheduler = None
 
         """if params.log_to_screen:
-      logging.info(self.model)"""
+      logging.warning(self.model)"""
         if params.log_to_screen:
-            logging.info(
+            logging.warning(
                 f"Number of trainable model parameters: {self.count_parameters()}"
             )
 
@@ -234,7 +234,7 @@ class Trainer:
 
     def train(self):
         if self.params.log_to_screen:
-            logging.info("Starting Training Loop...")
+            logging.warning("Starting Training Loop...")
 
         best_valid_loss = 1.0e6
         for epoch in range(self.startEpoch, self.params.max_epochs):
@@ -256,7 +256,7 @@ class Trainer:
             elif self.params.scheduler == "CosineAnnealingLR":
                 self.scheduler.step()
                 if self.epoch >= self.params.max_epochs:
-                    logging.info(
+                    logging.warning(
                         "Terminating training after reaching params.max_epochs while LR scheduler is set to CosineAnnealingLR"
                     )
                     exit()
@@ -271,21 +271,21 @@ class Trainer:
                     # checkpoint at the end of every epoch
                     self.save_checkpoint(self.params.checkpoint_path)
                     if valid_logs["valid_loss"] <= best_valid_loss:
-                        # logging.info('Val loss improved from {} to {}'.format(best_valid_loss, valid_logs['valid_loss']))
+                        # logging.warning('Val loss improved from {} to {}'.format(best_valid_loss, valid_logs['valid_loss']))
                         self.save_checkpoint(self.params.best_checkpoint_path)
                         best_valid_loss = valid_logs["valid_loss"]
 
             if self.params.log_to_screen:
-                logging.info(
+                logging.warning(
                     f"Time taken for epoch {epoch + 1} is {time.time() - start} sec"
                 )
-                # logging.info('train data time={}, train step time={}, valid step time={}'.format(data_time, tr_time, valid_time))
-                logging.info(
+                # logging.warning('train data time={}, train step time={}, valid step time={}'.format(data_time, tr_time, valid_time))
+                logging.warning(
                     f"Train loss: {train_logs['loss']}. Valid loss: {valid_logs['valid_loss']}"
                 )
 
     #        if epoch==self.params.max_epochs-1 and self.params.prediction_type == 'direct':
-    #          logging.info('Final Valid RMSE: Z500- {}. T850- {}, 2m_T- {}'.format(valid_weighted_rmse[0], valid_weighted_rmse[1], valid_weighted_rmse[2]))
+    #          logging.warning('Final Valid RMSE: Z500- {}. T850- {}, 2m_T- {}'.format(valid_weighted_rmse[0], valid_weighted_rmse[1], valid_weighted_rmse[2]))
 
     def train_one_epoch(self):
         self.epoch += 1
@@ -658,7 +658,7 @@ class Trainer:
 
     def load_model_wind(self, model_path):
         if self.params.log_to_screen:
-            logging.info(f"Loading the wind model weights from {model_path}")
+            logging.warning(f"Loading the wind model weights from {model_path}")
         checkpoint = torch.load(
             model_path, map_location=f"cuda:{self.params.local_rank}"
         )
@@ -801,4 +801,4 @@ if __name__ == "__main__":
 
     trainer = Trainer(params, world_rank)
     trainer.train()
-    logging.info("DONE ---- rank %d" % world_rank)
+    logging.warning("DONE ---- rank %d" % world_rank)

@@ -37,29 +37,30 @@ echo $PYTHONPATH
 
 echo "Current date completed loading modules: $now"
 
-# track per-code GPU load
-monitor gpu percent --all-cores >gpu-percent.log &
-GPU_PID=$!
+# # track per-code GPU load
+# monitor gpu percent --all-cores > ./gpu-percent.log &
+# GPU_PID=$!
 
 
-# track memory usage
-monitor gpu memory >gpu-memory.log &
-MEM_PID=$!
+# # track memory usage
+# monitor gpu memory > ./gpu-memory.log &
+# MEM_PID=$!
 
 
-# track per-code CPU load
-monitor cpu percent --all-cores >cpu-percent.log &
-CPU_PID=$!
+# # track per-code CPU load
+# monitor cpu percent --all-cores > ./cpu-percent.log &
+# CPU_PID=$!
 
-# track memory usage
-monitor cpu memory >cpu-memory.log &
-MEM_PID=$!
-
+# # track memory usage
+# monitor cpu memory > ./cpu-memory.log &
+# MEM_PID=$!
 
 
 # Loading anaconda environment
 source  /apps/spack/gilbreth/apps/anaconda/5.3.1-py37-gcc-4.8.5-7vvmykn/etc/profile.d/conda.sh
 conda activate pytorch
+
+export WANDB_API_KEY=07dce1789bed58aeeab69df88f3327bb330dd5a6
 
 
 # Change this directory to where you save the model-related files such as run_model.py
