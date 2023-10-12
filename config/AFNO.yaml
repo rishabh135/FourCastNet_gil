@@ -93,7 +93,7 @@ afno_backbone: &backbone
 
 afno_backbone_orography: &backbone_orography 
   <<: *backbone
-  orography: !!bool True
+  orography: !!bool False
   orography_path: '/scratch/gilbreth/wwtung/FourCastNet/data/static/orography.h5'
 
 afno_backbone_finetune: 
