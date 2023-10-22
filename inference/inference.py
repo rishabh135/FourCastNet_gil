@@ -50,6 +50,11 @@ import time
 import numpy as np
 import argparse
 
+
+# u850, v850, tcwv, rh_850
+
+# heatwave events: geopotential height(z), u, v, relative humidity, mean sea level pressure
+
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../")
 from numpy.core.numeric import False_
 import h5py

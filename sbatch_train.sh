@@ -1,16 +1,16 @@
 #!/bin/bash
 # change the directory path of model run-time output and error messages to your own
-#SBATCH --output=/scratch/gilbreth/gupt1075/train_fourcastnet.out
-#SBATCH --error=/scratch/gilbreth/gupt1075/train_fourcastnet.err
+#SBATCH --output=/scratch/gilbreth/gupt1075/train_fourcastnet_24.out
+#SBATCH --error=/scratch/gilbreth/gupt1075/train_fourcastnet_24.err
 # The file name of this submission file, so it's easier to track jobs
 # filename: submit_run_model_example.sub
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=32
 #SBATCH --gres=gpu:1 
-#SBATCH --time=2:00:00
+#SBATCH --time=24:00:00
 # partner queue has a 24-hour limit
 #SBATCH -A gdsp-k
-#SBATCH -C  "v100|a100|a30"
+#SBATCH -C  "v100|a100"
 # Job name, it will show up when you track this job
 #SBATCH -J fourcast_train_job
 # Use your email address so that you will receive email notifications about the job begin, end, or fail status

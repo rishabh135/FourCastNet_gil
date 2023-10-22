@@ -732,6 +732,9 @@ if __name__ == "__main__":
     if "WORLD_SIZE" in os.environ:
         params["world_size"] = int(os.environ["WORLD_SIZE"])
 
+
+    # remove dist init for nccl RuntimeError: Timed out initializing process group in store based barrier on rank: 0
+    params["world_size"] = 1
     world_rank = 0
     local_rank = 0
     if params["world_size"] > 1:
