@@ -4,7 +4,7 @@ import logging
 _format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 def config_logger(log_level=logging.INFO):
-  logging.basicConfig(format=_format, level=log_level)
+  logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/train_default.err", format=_format, level=log_level)
 
 def log_to_file(logger_name=None, log_level=logging.INFO, log_filename='tensorflow.log'):
 

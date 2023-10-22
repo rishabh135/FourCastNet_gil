@@ -802,6 +802,9 @@ if __name__ == "__main__":
         with open(os.path.join(expDir, "hyperparams.yaml"), "w") as hpfile:
             yaml.dump(hparams, hpfile)
 
+
+    logging.warning("".join(f'{k}={v} \n ' for k, v in vars(params).items()))
+    params["resuming"] = False
     trainer = Trainer(params, world_rank)
     trainer.train()
     logging.warning("DONE ---- rank %d" % world_rank)

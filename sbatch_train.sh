@@ -5,7 +5,7 @@
 # The file name of this submission file, so it's easier to track jobs
 # filename: submit_run_model_example.sub
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=32
+#SBATCH --ntasks-per-node=24
 #SBATCH --gres=gpu:1 
 #SBATCH --time=24:00:00
 # partner queue has a 24-hour limit
@@ -80,5 +80,8 @@ export LD_LIBRARY_PATH=/apps/spack/gilbreth/apps/anaconda/5.3.1-py37-gcc-4.8.5-7
 set -x
 python /scratch/gilbreth/gupt1075/FourCastNet/train.py --enable_amp --yaml_config=$config_file --config=$config --run_num=$run_num
 
+
+
+# python /scratch/gilbreth/gupt1075/FourCastNet/train.py --enable_amp --yaml_config="/scratch/gilbreth/gupt1075/FourCastNet/config/AFNO.yaml" --config="afno_backbone_finetune" --run_num="3"
 
 

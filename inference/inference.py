@@ -410,6 +410,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--config", default="full_field", type=str)
     parser.add_argument("--use_daily_climatology", action="store_true")
+    parser.add_argument("--fld", default="z500", type=str )
+    
     parser.add_argument("--vis", action="store_true")
     parser.add_argument(
         "--override_dir",
@@ -540,10 +542,10 @@ if __name__ == "__main__":
         
         
         
-        with open(f'/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_pred_output_{i}.npy', 'wb') as f:
+        with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:
             np.save(f, np.squeeze(sp))
-        with open(f'/scratch/gilbreth/gupt1075/ERA5_expts_gtc_2/seq_real_output_{i}.npy', 'wb') as f:
-            np.save(f, np.squeeze(sr))            
+        with open(f"{expDir}/seq_real_output_{i}.npy", 'wb') as f:
+            np.save(f, np.squeeze(sr)) 
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
         
         
