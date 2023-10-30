@@ -86,7 +86,7 @@ from datetime import datetime
 from torchinfo import summary
 
 # pressure geopotential height m2/second2    m
-fld = "u10"  # diff flds have diff decor times and hence differnt ics
+fld = "2m_temperature"  # diff flds have diff decor times and hence differnt ics
 #  first row is smoother and easier to predict for the future frames
 if fld == "z500" or fld == "2m_temperature" or fld == "t850":
     DECORRELATION_TIME = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
