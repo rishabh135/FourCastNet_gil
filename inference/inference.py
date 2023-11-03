@@ -85,8 +85,13 @@ import glob
 from datetime import datetime
 from torchinfo import summary
 
+
+_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_level=logging.INFO
+logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/inference_fourcastnet_default.err", level=log_level)
+
 # pressure geopotential height m2/second2    m
-fld = "2m_temperature"  # diff flds have diff decor times and hence differnt ics
+fld = "u10"  # diff flds have diff decor times and hence differnt ics
 #  first row is smoother and easier to predict for the future frames
 if fld == "z500" or fld == "2m_temperature" or fld == "t850":
     DECORRELATION_TIME = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
@@ -128,6 +133,7 @@ def downsample(x, scale=0.125):
 
 def setup(params):
     device = torch.cuda.current_device() if torch.cuda.is_available() else "cpu"
+    logging.warning(f" Theinference is being conducted using  {device} and save path {params.experiment_dir}   ")
     # get data loader
     valid_data_loader, valid_dataset = get_data_loader(
         params, params.inf_data_path, dist.is_initialized(), train=False
@@ -180,6 +186,8 @@ def setup(params):
         logging.warning("Inference data from {}".format(files_paths[yr]))
 
     valid_data_full = h5py.File(files_paths[yr], "r")["fields"]
+    
+    logging.warning(f" loading_data_loader_for_validation : {files_paths} ")
 
     return valid_data_full, model
 
@@ -506,7 +514,7 @@ if __name__ == "__main__":
                 ics.append(int(hours_since_jan_01_epoch / 6))
         n_ics = len(ics)
 
-    logging.warning("Inference for {} initial conditions".format(n_ics))
+    logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
     try:
         autoregressive_inference_filetag = params["inference_file_tag"]
     except:
@@ -540,6 +548,7 @@ if __name__ == "__main__":
             params, ic, valid_data_full, model
         )
         
+        logging.warning(f" Tracking last frame of initial_conditions {ic.shape}  {ic[-1].shape}  \n\n {ic[-1]} ")
         
         
         with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:
