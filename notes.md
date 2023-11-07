@@ -24,3 +24,12 @@ Take the course to business  purdue.edu/playtimepractice/paycontractdates/aycont
 
 
 # westwood lecture, gis day, allenai monitoriung, dubai ml team MBUZAi, 
+
+
+
+
+# 7th november
+
+# cropping North american midwest results
+# inference labelling frames with datetime
+# data assimmilation for scaling across more finer scale dataset for climateCx
