@@ -66,9 +66,9 @@ conda activate pytorch
 
 python /scratch/gilbreth/gupt1075/FourCastNet/inference/inference.py \
        --config='afno_backbone' \
-       --run_num='02' \
+       --run_num='04' \
        --weights="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt"  \
-       --override_dir="/scratch/gilbreth/gupt1075/ERA5_expts_23rd_jan_2018_u10_trial_1/" \
+       --override_dir="/scratch/gilbreth/gupt1075/ERA5_expts_23rd_jan_2018_u10_trial_4/" \
        --fld="u10"
 
 

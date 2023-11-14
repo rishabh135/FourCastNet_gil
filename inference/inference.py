@@ -91,7 +91,6 @@ log_level=logging.INFO
 logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/inference_fourcastnet_default.err", level=log_level)
 
 # pressure geopotential height m2/second2    m
-fld = "u10"  # diff flds have diff decor times and hence differnt ics
 #  first row is smoother and easier to predict for the future frames
 if fld == "z500" or fld == "2m_temperature" or fld == "t850":
     DECORRELATION_TIME = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
@@ -115,7 +114,7 @@ def load_model(model, params, checkpoint_file):
     new_state_dict = OrderedDict()
     for key, val in checkpoint["model_state"].items():
         name = key[7:]
-        logging.warning(f" Name: {name}   key: {key}   load_shape: {val.shape}  ")
+        # logging.warning(f" Name: {name}   key: {key}   load_shape: {val.shape}  ")
         if name != "ged":
             new_state_dict[name] = val
     model.load_state_dict(new_state_dict)
@@ -134,10 +133,11 @@ def downsample(x, scale=0.125):
 def setup(params):
     device = torch.cuda.current_device() if torch.cuda.is_available() else "cpu"
     logging.warning(f" Theinference is being conducted using  {device} and save path {params.experiment_dir}   ")
+    
     # get data loader
-    valid_data_loader, valid_dataset = get_data_loader(
-        params, params.inf_data_path, dist.is_initialized(), train=False
-    )
+    logging.warning(f" *** inference_data_path: {params.inf_data_path}")
+    valid_data_loader, valid_dataset = get_data_loader( params, params.inf_data_path, dist.is_initialized(), train=False)
+    
     img_shape_x = valid_dataset.img_shape_x
     img_shape_y = valid_dataset.img_shape_y
     params.img_shape_x = img_shape_x
@@ -483,7 +483,9 @@ if __name__ == "__main__":
     else:
         n_samples_per_year = 1460
 
-    if params["ics_type"] == "default":
+    if (params["ics_type"] == "default"):
+        
+        # just for testing remove afterwards
         num_samples = n_samples_per_year - params.prediction_length
         stop = num_samples
         ics = np.arange(0, stop, DECORRELATION_TIME)
@@ -491,12 +493,15 @@ if __name__ == "__main__":
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
         n_ics = len(ics)
-    elif params["ics_type"] == "datetime":
+        
+        
+    elif (params["ics_type"] == "datetime"):
+        
+        logging.warning(" {}".format( params["date_strings"] ) )
         date_strings = params["date_strings"]
         ics = []
-        if (
-            params.perturb
-        ):  # for perturbations use a single date and create n_ics perturbations
+        if (params.perturb):  
+            # for perturbations use a single date and create n_ics perturbations
             n_ics = params["n_perturbations"]
             date = date_strings[0]
             date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
@@ -505,6 +510,7 @@ if __name__ == "__main__":
             hours_since_jan_01_epoch = 24 * day_of_year + hour_of_day
             for ii in range(n_ics):
                 ics.append(int(hours_since_jan_01_epoch / 6))
+        
         else:
             for date in date_strings:
                 date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
@@ -513,8 +519,11 @@ if __name__ == "__main__":
                 hours_since_jan_01_epoch = 24 * day_of_year + hour_of_day
                 ics.append(int(hours_since_jan_01_epoch / 6))
         n_ics = len(ics)
-
-    logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
+        logging.warning(f" ICS for datetime: {ics} ")
+        logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
+        logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")
+    
+    
     try:
         autoregressive_inference_filetag = params["inference_file_tag"]
     except:
@@ -526,6 +535,8 @@ if __name__ == "__main__":
     autoregressive_inference_filetag += "_" + fld + ""
     if vis:
         autoregressive_inference_filetag += "_vis"
+    
+    
     # get data and models
     valid_data_full, model = setup(params)
 
@@ -544,11 +555,12 @@ if __name__ == "__main__":
     # run autoregressive inference for multiple initial conditions
     for i, ic in enumerate(ics):
         logging.warning("Initial condition {} of {}".format(i + 1, n_ics))
+        
         sr, sp, vl, a, au, vc, ac, acu, accland, accsea = autoregressive_inference(
             params, ic, valid_data_full, model
         )
         
-        logging.warning(f" Tracking last frame of initial_conditions {ic.shape}  {ic[-1].shape}  \n\n {ic[-1]} ")
+        # logging.warning(f" Tracking last frame of initial_conditions {ic}  {ic[-1].shape}  \n\n {ic[-1]} ")
         
         
         with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:

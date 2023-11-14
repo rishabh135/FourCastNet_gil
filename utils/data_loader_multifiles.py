@@ -113,8 +113,10 @@ class GetDataset(Dataset):
     self.files_paths = glob.glob(self.location + "/*.h5")
     self.files_paths.sort()
     self.n_years = len(self.files_paths)
+    
+    
     with h5py.File(self.files_paths[0], 'r') as _f:
-        logging.info("Getting file stats from {}".format(self.files_paths[0]))
+        logging.warning("Getting file stats from {}".format(self.files_paths[0]))
         self.n_samples_per_year = _f['fields'].shape[0]
         #original image shape (before padding)
         self.img_shape_x = _f['fields'].shape[2] -1#just get rid of one of the pixels
@@ -123,10 +125,10 @@ class GetDataset(Dataset):
     self.n_samples_total = self.n_years * self.n_samples_per_year
     self.files = [None for _ in range(self.n_years)]
     self.precip_files = [None for _ in range(self.n_years)]
-    logging.info("Number of samples per year: {}".format(self.n_samples_per_year))
-    logging.info("Found data at path {}. Number of examples: {}. Image Shape: {} x {} x {}".format(self.location, self.n_samples_total, self.img_shape_x, self.img_shape_y, self.n_in_channels))
-    logging.info("Delta t: {} hours".format(6*self.dt))
-    logging.info("Including {} hours of past history in training at a frequency of {} hours".format(6*self.dt*self.n_history, 6*self.dt))
+    logging.warning("Number of samples per year: {}".format(self.n_samples_per_year))
+    logging.warning("Found data at path {}. Number of examples: {}. Image Shape: {} x {} x {}".format(self.location, self.n_samples_total, self.img_shape_x, self.img_shape_y, self.n_in_channels))
+    logging.warning("Delta t: {} hours".format(6*self.dt))
+    logging.warning("Including {} hours of past history in training at a frequency of {} hours".format(6*self.dt*self.n_history, 6*self.dt))
 
 
   def _open_file(self, year_idx):

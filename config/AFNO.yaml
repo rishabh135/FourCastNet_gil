@@ -86,7 +86,7 @@ afno_backbone: &backbone
   global_means_path: '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_means.npy'
   global_stds_path:  '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_stds.npy'
 
-
+  date_strings: ["2018-01-23 00:00:00"] 
 
   
 #  model uses orography more smoother, surface level temperature, the veritcal velocity using contuinuity equation on the surface!
@@ -119,7 +119,7 @@ perturbations:
   save_channel: !bool True
   save_idx: 4
   save_raw_forecasts: !!bool False
-  date_strings: ["2018-01-01 00:00:00"] 
+  date_strings: ["2018-01-23 00:00:00"] 
   inference_file_tag: " "
   valid_data_path: "/scratch/gilbreth/wwtung/FourCastNet/data/test/"
   perturb: !!bool True

@@ -3,25 +3,25 @@ import logging
 
 class YParams():
   """ Yaml file parser """
-  def __init__(self, yaml_filename, config_name, print_params=False):
+  def __init__(self, yaml_filename, config_name, print_params=True):
     self._yaml_filename = yaml_filename
     self._config_name = config_name
     self.params = {}
 
     if print_params:
-      print("------------------ Configuration ------------------")
+      logging.warning("------------------ Configuration ------------------")
 
     with open(yaml_filename) as _file:
 
       for key, val in YAML().load(_file)[config_name].items():
-        if print_params: print(key, val)
+        if print_params: logging.warning(" Key: {} : {} ".format( key, val))
         if val =='None': val = None
 
         self.params[key] = val
         self.__setattr__(key, val)
 
     if print_params:
-      print("---------------------------------------------------")
+      logging.warning("---------------------------------------------------")
 
   def __getitem__(self, key):
     return self.params[key]
