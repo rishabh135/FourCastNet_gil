@@ -90,13 +90,6 @@ _format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 log_level=logging.INFO
 logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/inference_fourcastnet_default.err", level=log_level)
 
-# pressure geopotential height m2/second2    m
-#  first row is smoother and easier to predict for the future frames
-if fld == "z500" or fld == "2m_temperature" or fld == "t850":
-    DECORRELATION_TIME = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
-else:
-    DECORRELATION_TIME = 8  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
-idxes = {"u10": 0, "z500": 14, "2m_temperature": 2, "v10": 1, "t850": 5}
 
 
 def gaussian_perturb(x, level=0.01, device=0):
@@ -363,10 +356,13 @@ def autoregressive_inference(params, ic, valid_data_full, model):
                 )
 
             if params.log_to_screen:
-                idx = idxes[fld]
+                tmp_dict = params["idxes"]
+                # for key, val in tmp_dict.items():
+                #     logging.warning(f"key: {key} {val} ")
+                idx = tmp_dict[params["fld"]]
                 logging.warning(
                     "Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}".format(
-                        i, prediction_length, fld, valid_loss[i, idx], acc[i, idx]
+                        i, prediction_length, params["fld"], valid_loss[i, idx], acc[i, idx]
                     )
                 )
                 if params.interp > 0:
@@ -374,7 +370,7 @@ def autoregressive_inference(params, ic, valid_data_full, model):
                         "[COARSE] Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}".format(
                             i,
                             prediction_length,
-                            fld,
+                            params["fld"],
                             valid_loss_coarse[i, idx],
                             acc_coarse[i, idx],
                         )
@@ -418,7 +414,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--config", default="full_field", type=str)
     parser.add_argument("--use_daily_climatology", action="store_true")
+    
     parser.add_argument("--fld", default="z500", type=str )
+    
+    
     
     parser.add_argument("--vis", action="store_true")
     parser.add_argument(
@@ -437,6 +436,25 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     params = YParams(os.path.abspath(args.yaml_config), args.config)
+    params["fld"] = args.fld
+    params["idxes"] = {"u10": 0, "z500": 14, "2m_temperature": 2, "v10": 1, "t850": 5}
+
+    logging.warning(f" Params:  {params} ")
+    
+    
+    # pressure geopotential height m2/second2    m
+    #  first row is smoother and easier to predict for the future frames
+    if (params["fld"] == "z500" or params["fld"] == "2m_temperature" or params["fld"] == "t850"):
+        params["DECORRELATION_TIME"] = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
+    else:
+        params["DECORRELATION_TIME"] = 8  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
+    
+
+    
+    
+    
+    
+    
     params["world_size"] = 1
     params["interp"] = args.interp
     params["use_daily_climatology"] = args.use_daily_climatology
@@ -478,7 +496,7 @@ if __name__ == "__main__":
 
     n_ics = params["n_initial_conditions"]
 
-    if fld == "z500" or fld == "t850":
+    if params["fld"] == "z500" or params["fld"] == "t850":
         n_samples_per_year = 1336
     else:
         n_samples_per_year = 1460
@@ -488,7 +506,7 @@ if __name__ == "__main__":
         # just for testing remove afterwards
         num_samples = n_samples_per_year - params.prediction_length
         stop = num_samples
-        ics = np.arange(0, stop, DECORRELATION_TIME)
+        ics = np.arange(0, stop,  params["DECORRELATION_TIME"] )
         logging.warning(f" ICS: {ics} ")
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
@@ -532,7 +550,7 @@ if __name__ == "__main__":
     if params.interp > 0:
         autoregressive_inference_filetag = "_coarse"
 
-    autoregressive_inference_filetag += "_" + fld + ""
+    autoregressive_inference_filetag += "_" + params["fld"] + ""
     if vis:
         autoregressive_inference_filetag += "_vis"
     

@@ -60,7 +60,7 @@ full_field: &FULL_FIELD
   crop_size_y: None
 
   two_step_training: !!bool False
-  plot_animations: !!bool False
+  plot_animations: !!bool True
 
   add_noise: !!bool False
   noise_std: 0
