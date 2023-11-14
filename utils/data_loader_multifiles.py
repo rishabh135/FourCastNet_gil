@@ -122,6 +122,8 @@ class GetDataset(Dataset):
         self.img_shape_x = _f['fields'].shape[2] -1#just get rid of one of the pixels
         self.img_shape_y = _f['fields'].shape[3]
 
+
+    logging.warning(f" n_years: {self.n_years}  \n n_samples_per_yeaer: {self.n_samples_per_year} \n dt: {self.dt}  n_history: {self.n_history} ")
     self.n_samples_total = self.n_years * self.n_samples_per_year
     self.files = [None for _ in range(self.n_years)]
     self.precip_files = [None for _ in range(self.n_years)]
