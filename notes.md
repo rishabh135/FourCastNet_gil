@@ -33,3 +33,9 @@ Take the course to business  purdue.edu/playtimepractice/paycontractdates/aycont
 # cropping North american midwest results
 # inference labelling frames with datetime
 # data assimmilation for scaling across more finer scale dataset for climateCx
+
+
+
+
+# check n_ics, decorrelation_time,  and why number_of_samples_per_year is different from 1336 to 1460
+# convert to real time output for predicted_frames

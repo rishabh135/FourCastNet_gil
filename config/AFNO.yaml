@@ -3,9 +3,9 @@ full_field: &FULL_FIELD
   loss: 'l2'
   lr: 1E-3
   scheduler: 'ReduceLROnPlateau'
-  num_data_workers: 4
+  num_data_workers: 2
   dt: 1 # how many timesteps ahead the model will predict
-  n_history: 3 #how many previous timesteps to consider
+  n_history: 0 #how many previous timesteps to consider
   prediction_type: 'iterative'
   prediction_length: 41 #applicable only if prediction_type == 'iterative'
   n_initial_conditions: 5 #applicable only if prediction_type == 'iterative'

@@ -290,6 +290,8 @@ def autoregressive_inference(params, ic, valid_data_full, model):
             if i == 0:  # start of sequence
                 first = valid_data[0 : n_history + 1]
                 future = valid_data[n_history + 1]
+                
+                logging.warning(f" first {first.shape}  future: {future.shape} ")
                 for h in range(n_history + 1):
                     seq_real[h] = first[h * n_in_channels : (h + 1) * n_in_channels][
                         0:n_out_channels
@@ -306,12 +308,17 @@ def autoregressive_inference(params, ic, valid_data_full, model):
             else:
                 if i < prediction_length - 1:
                     future = valid_data[n_history + i + 1]
+                    
+                    
+                # Main step
                 if orography:
                     future_pred = model(
                         torch.cat((future_pred, orog), axis=1)
                     )  # autoregressive step
                 else:
                     future_pred = model(future_pred)  # autoregressive step
+
+            logging.warning(f" predicted future_pred with shape {future_pred.shape} ")
 
             if i < prediction_length - 1:  # not on the last step
                 seq_pred[n_history + i + 1] = future_pred
