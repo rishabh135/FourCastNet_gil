@@ -123,6 +123,13 @@ def downsample(x, scale=0.125):
     return torch.nn.functional.interpolate(x, scale_factor=scale, mode="bilinear")
 
 
+
+def denormalize(valid_data, means, stds):
+    # valid_data = (valid_data - means) / stds
+    outs = (valid_data * stds) + means
+    return outs
+
+
 def setup(params):
     device = torch.cuda.current_device() if torch.cuda.is_available() else "cpu"
     logging.warning(f" Theinference is being conducted using  {device} and save path {params.experiment_dir}   ")
@@ -587,6 +594,9 @@ if __name__ == "__main__":
         
         # logging.warning(f" Tracking last frame of initial_conditions {ic}  {ic[-1].shape}  \n\n {ic[-1]} ")
         
+        
+        sp = denormalize(sp, params.means, params.stds)
+        sr = denormalize(sr, params.means, params.stds)
         
         with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:
             np.save(f, np.squeeze(sp))

@@ -112,7 +112,8 @@ perturbations:
   max_epochs: 50
   pretrained: !!bool True
   two_step_training: !!bool True
-  pretrained_ckpt_path: '/pscratch/sd/j/jpathak/ERA5_expts_gtc/wind/afno_20ch_bs_64_lr5em4_blk_8_patch_8_cosine_sched/1/training_checkpoints/best_ckpt.tar'
+  pretrained_ckpt_path: "/scratch/gilbreth/wwtung/FourCastNet/model_weights/FCN_weights_v0/backbone.ckpt"  
+  # '/pscratch/sd/j/jpathak/ERA5_expts_gtc/wind/afno_20ch_bs_64_lr5em4_blk_8_patch_8_cosine_sched/1/training_checkpoints/best_ckpt.tar'
   prediction_length: 24
   ics_type: "datetime"
   n_perturbations: 100 
