@@ -3,11 +3,11 @@ full_field: &FULL_FIELD
   loss: 'l2'
   lr: 1E-3
   scheduler: 'ReduceLROnPlateau'
-  num_data_workers: 2
+  num_data_workers: 4
   dt: 1 # how many timesteps ahead the model will predict
   n_history: 0 #how many previous timesteps to consider
   prediction_type: 'iterative'
-  prediction_length: 41 #applicable only if prediction_type == 'iterative'
+  prediction_length: 4 #applicable only if prediction_type == 'iterative'
   n_initial_conditions: 5 #applicable only if prediction_type == 'iterative'
   ics_type: "datetime"
   save_raw_forecasts: !!bool True
@@ -64,6 +64,7 @@ full_field: &FULL_FIELD
 
   add_noise: !!bool False
   noise_std: 0
+  date_strings: ["2018-01-05 00:00:00"] 
 
 afno_backbone: &backbone
   <<: *FULL_FIELD
@@ -85,8 +86,6 @@ afno_backbone: &backbone
   time_means_path:   '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/time_means.npy'
   global_means_path: '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_means.npy'
   global_stds_path:  '/scratch/gilbreth/wwtung/FourCastNet/additional/stats_v0/global_stds.npy'
-
-  date_strings: ["2018-01-23 00:00:00"] 
 
   
 #  model uses orography more smoother, surface level temperature, the veritcal velocity using contuinuity equation on the surface!
@@ -112,8 +111,7 @@ perturbations:
   max_epochs: 50
   pretrained: !!bool True
   two_step_training: !!bool True
-  pretrained_ckpt_path: "/scratch/gilbreth/wwtung/FourCastNet/model_weights/FCN_weights_v0/backbone.ckpt"  
-  # '/pscratch/sd/j/jpathak/ERA5_expts_gtc/wind/afno_20ch_bs_64_lr5em4_blk_8_patch_8_cosine_sched/1/training_checkpoints/best_ckpt.tar'
+  pretrained_ckpt_path: '/pscratch/sd/j/jpathak/ERA5_expts_gtc/wind/afno_20ch_bs_64_lr5em4_blk_8_patch_8_cosine_sched/1/training_checkpoints/best_ckpt.tar'
   prediction_length: 24
   ics_type: "datetime"
   n_perturbations: 100 

@@ -44,47 +44,48 @@
 # Karthik Kashinath - NVIDIA Corporation
 # Animashree Anandkumar - California Institute of Technology, NVIDIA Corporation
 
+import argparse
 import os
 import sys
 import time
-import numpy as np
-import argparse
 
+import numpy as np
 
 # u850, v850, tcwv, rh_850
 
 # heatwave events: geopotential height(z), u, v, relative humidity, mean sea level pressure
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../")
-from numpy.core.numeric import False_
+import logging
+from collections import OrderedDict
+
 import h5py
 import torch
-import torchvision
-from torchvision.utils import save_image
-import torch.nn as nn
 import torch.cuda.amp as amp
 import torch.distributed as dist
-from collections import OrderedDict
+import torch.nn as nn
+import torchvision
+from numpy.core.numeric import False_
 from torch.nn.parallel import DistributedDataParallel
-import logging
+from torchvision.utils import save_image
 from utils import logging_utils
 from utils.weighted_acc_rmse import (
-    weighted_rmse_torch_channels,
-    weighted_acc_torch_channels,
     unweighted_acc_torch_channels,
     weighted_acc_masked_torch_channels,
+    weighted_acc_torch_channels,
+    weighted_rmse_torch_channels,
 )
 
 logging_utils.config_logger()
-from utils.YParams import YParams
-from utils.data_loader_multifiles import get_data_loader
-from networks.afnonet import AFNONet
-import wandb
-import matplotlib.pyplot as plt
 import glob
 from datetime import datetime
-from torchinfo import summary
 
+import matplotlib.pyplot as plt
+import wandb
+from networks.afnonet import AFNONet
+from torchinfo import summary
+from utils.data_loader_multifiles import get_data_loader
+from utils.YParams import YParams
 
 _format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 log_level=logging.INFO
@@ -121,13 +122,6 @@ def load_model(model, params, checkpoint_file):
 
 def downsample(x, scale=0.125):
     return torch.nn.functional.interpolate(x, scale_factor=scale, mode="bilinear")
-
-
-
-def denormalize(valid_data, means, stds):
-    # valid_data = (valid_data - means) / stds
-    outs = (valid_data * stds) + means
-    return outs
 
 
 def setup(params):
@@ -297,8 +291,6 @@ def autoregressive_inference(params, ic, valid_data_full, model):
             if i == 0:  # start of sequence
                 first = valid_data[0 : n_history + 1]
                 future = valid_data[n_history + 1]
-                
-                logging.warning(f" first {first.shape}  future: {future.shape} ")
                 for h in range(n_history + 1):
                     seq_real[h] = first[h * n_in_channels : (h + 1) * n_in_channels][
                         0:n_out_channels
@@ -315,17 +307,12 @@ def autoregressive_inference(params, ic, valid_data_full, model):
             else:
                 if i < prediction_length - 1:
                     future = valid_data[n_history + i + 1]
-                    
-                    
-                # Main step
                 if orography:
                     future_pred = model(
                         torch.cat((future_pred, orog), axis=1)
                     )  # autoregressive step
                 else:
                     future_pred = model(future_pred)  # autoregressive step
-
-            logging.warning(f" predicted future_pred with shape {future_pred.shape} ")
 
             if i < prediction_length - 1:  # not on the last step
                 seq_pred[n_history + i + 1] = future_pred
@@ -594,9 +581,6 @@ if __name__ == "__main__":
         
         # logging.warning(f" Tracking last frame of initial_conditions {ic}  {ic[-1].shape}  \n\n {ic[-1]} ")
         
-        
-        sp = denormalize(sp, params.means, params.stds)
-        sr = denormalize(sr, params.means, params.stds)
         
         with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:
             np.save(f, np.squeeze(sp))

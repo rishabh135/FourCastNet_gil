@@ -1,10 +1,20 @@
-import os
 import logging
+import os
 
 _format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
+from datetime import datetime
+
+# Get the current date and time
+now = datetime.now()
+
+# Format the date to get the day and month
+day_month = now.strftime("%B_%d_")
+
+
+
 def config_logger(log_level=logging.INFO):
-  logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/train_default.err", format=_format, level=log_level)
+  logging.basicConfig(filename = f"/scratch/gilbreth/gupt1075/{day_month}_default.err", format=_format, level=log_level)
 
 def log_to_file(logger_name=None, log_level=logging.INFO, log_filename='tensorflow.log'):
 
@@ -22,8 +32,9 @@ def log_to_file(logger_name=None, log_level=logging.INFO, log_filename='tensorfl
   log.addHandler(fh)
 
 def log_versions():
-  import torch
   import subprocess
+
+  import torch
 
   logging.info('--------------- Versions ---------------')
 #   logging.info('git branch: ' + str(subprocess.check_output(['git', 'branch']).strip()))
