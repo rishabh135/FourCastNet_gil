@@ -405,7 +405,7 @@ def hours_to_datetime(hours):
     # Create a datetime object for the start of the day
     start_date = datetime(2018, 1, 1, 0, 0, 0)
     # Add the number of days and hours to the start date
-    date = start_date + timedelta(days=days, hours=hours)
+    date = start_date + timedelta(days= int(days), hours= int(hours))
     # Return the datetime object
     return date
 
