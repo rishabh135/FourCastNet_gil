@@ -401,6 +401,8 @@ if __name__ == '__main__':
     parser.add_argument('--run_num', default='00', type=str)
     parser.add_argument('--yaml_config', default="/scratch/gilbreth/gupt1075/FourCastNet/config/AFNO.yaml",
                         type=str)
+    
+    # defaul full_field vs afno_backbone
     parser.add_argument('--config', default='full_field', type=str)
     parser.add_argument('--use_daily_climatology', action='store_true')
     parser.add_argument("--fld", default="z500", type=str )
@@ -501,6 +503,11 @@ if __name__ == '__main__':
                     + hour_of_day
                 ics.append(int(hours_since_jan_01_epoch / 6))
         n_ics = len(ics)
+        logging.warning(f" #### ICS for datetime: {ics} ")
+        logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
+        logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")
+
+
 
     logging.info('Inference for {} initial conditions'.format(n_ics))
     try:
