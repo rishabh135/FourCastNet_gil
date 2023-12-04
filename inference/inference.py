@@ -393,6 +393,22 @@ def autoregressive_inference(
         )
 
 
+
+from datetime import datetime, timedelta
+
+
+def hours_to_datetime(hours):
+    # Calculate the number of days that have elapsed since January 1, 2018 00:00
+    days = hours // 24
+    # Calculate the number of hours that have elapsed since the start of the day
+    hours = hours % 24
+    # Create a datetime object for the start of the day
+    start_date = datetime(2018, 1, 1, 0, 0, 0)
+    # Add the number of days and hours to the start date
+    date = start_date + timedelta(days=days, hours=hours)
+    # Return the datetime object
+    return date
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--run_num', default='00', type=str)
@@ -479,7 +495,7 @@ if __name__ == '__main__':
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
         n_ics = len(ics)
-        logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}   ")
+        logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
         # logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
 
 
@@ -563,9 +579,13 @@ if __name__ == '__main__':
                     model)
 
 
-        with open(f"{expDir}/seq_pred_output_{i}.npy", 'wb') as f:
+        date_object = hours_to_datetime(ics[i])
+        # Format the date to get the day and month
+        date_string = date_object.strftime("%d_%B_%H:%M:%S")
+        
+        with open(f"{expDir}/seq_pred_output_{i}_{date_string}.npy", 'wb') as f:
             np.save(f, np.squeeze(sp))
-        with open(f"{expDir}/seq_real_output_{i}.npy", 'wb') as f:
+        with open(f"{expDir}/seq_real_output_{i}_{date_string}.npy", 'wb') as f:
             np.save(f, np.squeeze(sr)) 
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
 
