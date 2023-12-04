@@ -11,8 +11,6 @@ now = datetime.now()
 # Format the date to get the day and month
 day_month = now.strftime("%B_%d_")
 
-
-
 def config_logger(log_level=logging.INFO):
   logging.basicConfig(filename = f"/scratch/gilbreth/gupt1075/{day_month}_default.err", format=_format, level=log_level)
 

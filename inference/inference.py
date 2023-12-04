@@ -114,19 +114,15 @@ def load_model(model, params, checkpoint_file):
 
 
 def downsample(x, scale=0.125):
-    return torch.nn.functional.interpolate(x, scale_factor=scale,
-            mode='bilinear')
+    return torch.nn.functional.interpolate(x, scale_factor=scale, mode='bilinear')
 
 
 def setup(params):
-    device = \
-        (torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
-         )
+    device = (torch.cuda.current_device() if torch.cuda.is_available() else 'cpu')
 
     # get data loader
 
-    (valid_data_loader, valid_dataset) = get_data_loader(params,
-            params.inf_data_path, dist.is_initialized(), train=False)
+    (valid_data_loader, valid_dataset) = get_data_loader(params, params.inf_data_path, dist.is_initialized(), train=False)
     img_shape_x = valid_dataset.img_shape_x
     img_shape_y = valid_dataset.img_shape_y
     params.img_shape_x = img_shape_x
@@ -162,6 +158,7 @@ def setup(params):
     # load the validation data
 
     files_paths = glob.glob(params.inf_data_path + '/*.h5')
+    logging.warning(f" loading validation data {files_paths} ")
     files_paths.sort()
 
     # which year
@@ -412,7 +409,7 @@ if __name__ == '__main__':
                         help='Path to store inference outputs; must also set --weights arg'
                         )
     parser.add_argument('--interp', default=0, type=float)
-    parser.add_argument('--weights', default=None, type=str,
+    parser.add_argument('--weights', default="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt", type=str,
                         help='Path to model weights, for use with override_dir option'
                         )
 
@@ -482,6 +479,12 @@ if __name__ == '__main__':
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
         n_ics = len(ics)
+        logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}   ")
+        # logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
+
+
+
+        
     elif params['ics_type'] == 'datetime':
         date_strings = params['date_strings']
         ics = []
@@ -509,7 +512,9 @@ if __name__ == '__main__':
 
 
 
-    logging.info('Inference for {} initial conditions'.format(n_ics))
+    # logging.info('Inference for {} initial conditions'.format(n_ics))
+    # logging.warning('\n Listed ics {} initial conditions'.format(ics))
+    
     try:
         autoregressive_inference_filetag = params['inference_file_tag']
     except:
