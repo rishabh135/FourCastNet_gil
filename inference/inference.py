@@ -416,8 +416,8 @@ if __name__ == "__main__":
     parser.add_argument("--config", default="full_field", type=str)
     parser.add_argument("--use_daily_climatology", action="store_true")
     
-    parser.add_argument("--fld", default="z500", type=str )
-    
+    parser.add_argument("--The question asks for the probability of the event P(1 + z + z^2 > 0) where z is a standard normal random variable. This event is always true because 1 + z + z^2 is always greater than 0 for any real number z.
+
     
     
     parser.add_argument("--vis", action="store_true")
