@@ -1,0 +1,21 @@
+import glob
+
+from PIL import Image
+
+# Create the frames
+frames = []
+imgs = sorted(glob.glob("./KHGX_3/ref_KHGX_2017*.png"))
+for i in imgs:
+    print(f" curretnly working on {i}  ")
+    new_frame = Image.open(i)
+    frames.append(new_frame)
+
+# Save into a GIF file that loops forever
+frames[0].save(
+    "./hurricane_harvey_hourly.gif",
+    format="GIF",
+    append_images=frames[1:],
+    save_all=True,
+    duration=6000,
+    loop=0,
+)
