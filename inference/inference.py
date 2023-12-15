@@ -397,11 +397,11 @@ def autoregressive_inference(
 from datetime import datetime, timedelta
 
 
-def hours_to_datetime(hours):
+def hours_to_datetime(hours, start_year):
     days = hours // 24
     hours = hours % 24
     
-    start_date = datetime(2018, 1, 1, 0, 0, 0)
+    start_date = datetime(start_year, 1, 1, 0, 0, 0)
     date = start_date + timedelta(days= int(days), hours= int(hours))
     return date
 
@@ -583,7 +583,7 @@ if __name__ == '__main__':
                     model)
 
 
-        date_object = hours_to_datetime(ics[i])
+        date_object = hours_to_datetime(ics[i], 2018)
         # Format the date to get the day and month
         date_string = date_object.strftime("%d_%B_%H:%M:%S")
         
