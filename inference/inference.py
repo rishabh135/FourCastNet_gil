@@ -398,15 +398,11 @@ from datetime import datetime, timedelta
 
 
 def hours_to_datetime(hours):
-    # Calculate the number of days that have elapsed since January 1, 2018 00:00
     days = hours // 24
-    # Calculate the number of hours that have elapsed since the start of the day
     hours = hours % 24
-    # Create a datetime object for the start of the day
+    
     start_date = datetime(2018, 1, 1, 0, 0, 0)
-    # Add the number of days and hours to the start date
     date = start_date + timedelta(days= int(days), hours= int(hours))
-    # Return the datetime object
     return date
 
 
@@ -591,9 +587,9 @@ if __name__ == '__main__':
         # Format the date to get the day and month
         date_string = date_object.strftime("%d_%B_%H:%M:%S")
         
-        with open(f"{expDir}/seq_pred_output_{i}_{date_string}.npy", 'wb') as f:
+        with open(f"{expDir}/seq_pred_output_{i}_datetime_{date_string}.npy", 'wb') as f:
             np.save(f, np.squeeze(sp))
-        with open(f"{expDir}/seq_real_output_{i}_{date_string}.npy", 'wb') as f:
+        with open(f"{expDir}/seq_real_output_{i}_datetime_{date_string}.npy", 'wb') as f:
             np.save(f, np.squeeze(sr)) 
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
 
