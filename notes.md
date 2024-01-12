@@ -47,3 +47,13 @@ Take the course to business  purdue.edu/playtimepractice/paycontractdates/aycont
 
 
 # the tropics have very strong signal, does not mean that most rain which is important is in tropics.  arctics water vapour is radiationally importatnt, arctic amplificatioon, gradient used for calculation matters a lot. standardize 
+
+
+
+
+
+
+
+# de normalization of total precipitation from log (1 + tp/e), TP used as a diagnostic variable
+# earth2mip model loading for AFNOnet 
+# loading makani 

@@ -66,10 +66,11 @@ conda activate /home/gupt1075/.conda/envs/cent7/5.3.1-py37/pytorch
 # cd /scratch/gilbreth/wwtung/FourCastNet/
 
 python /scratch/gilbreth/gupt1075/FourCastNet/inference/inference.py \
-       --config='afno_backbone' \
-       --run_num='02' \
-       --weights "/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt"  \
-       --override_dir '/scratch/gilbreth/gupt1075/ERA5_expts_2m_temperature_trial_1/' 
+       --config="afno_backbone" \
+       --run_num="02" \
+       --fld="t850" \
+       --weights="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt"  \
+       --override_dir="/scratch/gilbreth/gupt1075/ERA5_expts_2m_temperature_trial_1/"
 
 
 
