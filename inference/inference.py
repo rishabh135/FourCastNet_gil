@@ -86,6 +86,24 @@ from utils.YParams import YParams
 
 
 
+def get_base_year(filename):
+    # extract the year using regular expressions
+    year = os.path.basename(filename)[:4]
+    # check if the year is a 4-digit number
+    if len(year) == 4 and year.isdigit():
+        print("Year:", year)
+    else:
+        print("Invalid filename format")
+    return year
+
+
+# def get_base_year(base_path):
+#     year_match = re.search(r'\b(19[7-9]\d|20[0-2]\d)\b', os.path.basename(base_path))
+#     if year_match:
+#         return year_match.group(1)
+#     else:
+#         raise ValueError(f"Invalid base path format: {base_path}")
+
 
 
 def gaussian_perturb(x, level=0.01, device=0):
@@ -180,10 +198,12 @@ def setup(params):
     if params.log_to_screen:
         logging.info(f'Loading inference data from {files_paths[yr]}')
 
+
+    valid_year = get_base_year(files_paths[yr])
     # Load the validation data from the selected year
     valid_data_full = h5py.File(files_paths[yr], 'r')['fields']
 
-    return valid_data_full, model
+    return valid_data_full, model, valid_year
 
 
 
@@ -404,15 +424,25 @@ def autoregressive_inference(
 
 
 
-def hours_to_datetime(hours, start_year):
-    days = hours // 24
-    hours = hours % 24
-    
-    start_date = datetime(start_year, 1, 1, 0, 0, 0)
-    date = start_date + timedelta(days= int(days), hours= int(hours))
+def hours_to_datetime(hours, start_year, default_timedelta=6):
+    """
+    Convert hours to a datetime object.
+
+    Args:
+        hours (int): Number of hours since the start of the year.
+        start_year (int): The starting year for the calculation.
+        default_timedelta (int, optional): The default time delta in hours. Defaults to 6.
+
+    Returns:
+        datetime: The datetime object representing the calculated date and time.
+    """
+    total_hours = default_timedelta * 6  # Calculate the total hours based on the default time delta
+    days, hours = divmod(hours, 24)  # Calculate the number of days and remaining hours
+
+    start_date = datetime(start_year, 1, 1, 0, 0, 0)  # Create a datetime object for the start of the year
+    date = start_date + timedelta(days=days, hours=hours)  # Add the calculated days and hours to the start date
+
     return date
-
-
 
 
 
@@ -544,7 +574,7 @@ if __name__ == '__main__':
 
     # get data and models
 
-    (valid_data_full, model) = setup(params)
+    (valid_data_full, model, valid_year) = setup(params)
 
     # initialize lists for image sequences and RMSE/ACC
 
@@ -563,7 +593,7 @@ if __name__ == '__main__':
 
     for (i, ic) in enumerate(ics):
         
-        date_object = hours_to_datetime(ics[i]*6, 2018)
+        date_object = hours_to_datetime(ics[i], 2018)
         logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_object}")
         
         (
