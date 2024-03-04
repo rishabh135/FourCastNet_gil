@@ -84,93 +84,107 @@ from networks.afnonet import AFNONet
 from utils.data_loader_multifiles import get_data_loader
 from utils.YParams import YParams
 
-_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-log_level=logging.INFO
-logging.basicConfig(filename ="/scratch/gilbreth/gupt1075/inference_default.err", level=log_level)
 
 
 
 
 def gaussian_perturb(x, level=0.01, device=0):
+    # Add Gaussian noise to the input tensor x with a specified noise level and device
     noise = level * torch.randn(x.shape).to(device, dtype=torch.float)
     return x + noise
 
 
 def load_model(model, params, checkpoint_file):
+    # Clear the gradients of the model
     model.zero_grad()
+    
+    # Load the checkpoint from the specified file
     checkpoint_fname = checkpoint_file
     checkpoint = torch.load(checkpoint_fname)
+    
     try:
+        # Create a new state dictionary and copy the model state from the checkpoint, excluding the 'ged' key
         new_state_dict = OrderedDict()
         for (key, val) in checkpoint['model_state'].items():
             name = key[7:]
             if name != 'ged':
                 new_state_dict[name] = val
+        # Load the new state dictionary into the model
         model.load_state_dict(new_state_dict)
     except:
+        # If the above fails, directly load the model state from the checkpoint
         model.load_state_dict(checkpoint['model_state'])
+    
+    # Set the model to evaluation mode
     model.eval()
+    
+    # Return the loaded model
     return model
+
+
 
 
 def downsample(x, scale=0.125):
     return torch.nn.functional.interpolate(x, scale_factor=scale, mode='bilinear')
 
 
+
 def setup(params):
-    device = (torch.cuda.current_device() if torch.cuda.is_available() else 'cpu')
+    # Get the device (GPU if available, else CPU)
+    device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
 
-    # get data loader
+    # Get the data loader and dataset
+    valid_data_loader, valid_dataset = get_data_loader(params, params.inf_data_path, dist.is_initialized(), train=False)
 
-    (valid_data_loader, valid_dataset) = get_data_loader(params, params.inf_data_path, dist.is_initialized(), train=False)
+    # Get image shape from the dataset
     img_shape_x = valid_dataset.img_shape_x
     img_shape_y = valid_dataset.img_shape_y
     params.img_shape_x = img_shape_x
     params.img_shape_y = img_shape_y
-    if params.log_to_screen:
-        logging.info('Loading trained model checkpoint from {}'.format(params['best_checkpoint_path'
-                     ]))
 
+    # Log loading of trained model checkpoint
+    if params.log_to_screen:
+        logging.info(f'Loading trained model checkpoint from {params["best_checkpoint_path"]}')
+
+    # Get input and output channels
     in_channels = np.array(params.in_channels)
     out_channels = np.array(params.out_channels)
     n_in_channels = len(in_channels)
     n_out_channels = len(out_channels)
 
-    if params['orography']:
-        params['N_in_channels'] = n_in_channels + 1
-    else:
-        params['N_in_channels'] = n_in_channels
+    # Set number of input and output channels in params
+    params['N_in_channels'] = n_in_channels + 1 if params['orography'] else n_in_channels
     params['N_out_channels'] = n_out_channels
-    params.means = np.load(params.global_means_path)[0, out_channels]  # needed to standardize wind data
+
+    # Load means and stds needed for standardizing wind data
+    params.means = np.load(params.global_means_path)[0, out_channels]
     params.stds = np.load(params.global_stds_path)[0, out_channels]
 
-    # load the model
-
+    # Load the model based on the network type
     if params.nettype == 'afno':
         model = AFNONet(params).to(device)
     else:
         raise Exception('not implemented')
 
+    # Load the model weights from the checkpoint file
     checkpoint_file = params['best_checkpoint_path']
     model = load_model(model, params, checkpoint_file)
     model = model.to(device)
 
-    # load the validation data
+    # Load the validation data paths
+    files_paths = sorted(glob.glob(params.inf_data_path + '/*.h5'))
+    logging.warning(f"Loading validation data {files_paths}")
 
-    files_paths = glob.glob(params.inf_data_path + '/*.h5')
-    logging.warning(f" loading validation data {files_paths} ")
-    files_paths.sort()
-
-    # which year
-
+    # Select the year for inference
     yr = 0
     if params.log_to_screen:
-        logging.info('Loading inference data')
-        logging.info('Inference data from {}'.format(files_paths[yr]))
+        logging.info(f'Loading inference data from {files_paths[yr]}')
 
+    # Load the validation data from the selected year
     valid_data_full = h5py.File(files_paths[yr], 'r')['fields']
 
-    return (valid_data_full, model)
+    return valid_data_full, model
+
 
 
 def autoregressive_inference(
@@ -251,9 +265,7 @@ def autoregressive_inference(
     # load time means
 
     if not params.use_daily_climatology:
-        m = \
-            torch.as_tensor((np.load(params.time_means_path)[0][out_channels]
-                            - means) / stds)[:, 0:img_shape_x]  # climatology
+        m = torch.as_tensor((np.load(params.time_means_path)[0][out_channels]- means) / stds)[:, 0:img_shape_x]  # climatology
         m = torch.unsqueeze(m, 0)
     else:
 
@@ -261,10 +273,8 @@ def autoregressive_inference(
 
         dc_path = params.dc_path
         with h5py.File(dc_path, 'r') as f:
-            dc = f['time_means_daily'][ic:ic + prediction_length * dt:
-                    dt]  # 1460,21,721,1440
-        m = torch.as_tensor((dc[:, out_channels, 0:img_shape_x, :]
-                            - means) / stds)
+            dc = f['time_means_daily'][ic:ic + prediction_length * dt:dt]  # 1460,21,721,1440
+        m = torch.as_tensor((dc[:, out_channels, 0:img_shape_x, :]- means) / stds)
 
     m = m.to(device, dtype=torch.float)
     if params.interp > 0:
@@ -276,9 +286,7 @@ def autoregressive_inference(
     orography_path = params.orography_path
     if orography:
         orog = \
-            torch.as_tensor(np.expand_dims(np.expand_dims((h5py.File(orography_path,
-                            'r')['orog'])[0:720], axis=0),
-                            axis=0)).to(device, dtype=torch.float)
+            torch.as_tensor(np.expand_dims(np.expand_dims((h5py.File(orography_path,'r')['orog'])[0:720], axis=0),axis=0)).to(device, dtype=torch.float)
         logging.info('orography loaded; shape:{}'.format(orog.shape))
 
     # autoregressive inference
@@ -416,8 +424,7 @@ def hours_to_datetime(hours, start_year):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--run_num', default='00', type=str)
-    parser.add_argument('--yaml_config', default="/scratch/gilbreth/gupt1075/FourCastNet/config/AFNO.yaml",
-                        type=str)
+    parser.add_argument('--yaml_config', default="/scratch/gilbreth/gupt1075/FourCastNet/config/AFNO.yaml", type=str)
     
     # defaul full_field vs afno_backbone
     parser.add_argument('--config', default='full_field', type=str)
@@ -425,13 +432,9 @@ if __name__ == '__main__':
     parser.add_argument("--fld", default="z500", type=str )
     
     parser.add_argument('--vis', action='store_true')
-    parser.add_argument('--override_dir', default=None, type=str,
-                        help='Path to store inference outputs; must also set --weights arg'
-                        )
+    parser.add_argument('--exp_dir', default=None, type=str, help='Path to store inference outputs; must also set --weights arg')
     parser.add_argument('--interp', default=0, type=float)
-    parser.add_argument('--weights', default="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt", type=str,
-                        help='Path to model weights, for use with override_dir option'
-                        )
+    parser.add_argument('--weights', default="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt", type=str, help='Path to model weights, for use with exp_dir option')
 
     args = parser.parse_args()
     params = YParams(os.path.abspath(args.yaml_config), args.config)
@@ -459,29 +462,23 @@ if __name__ == '__main__':
 
     # Set up directory
 
-    if args.override_dir is not None:
+    if args.exp_dir is not None:
         assert args.weights is not None, \
-            'Must set --weights argument if using --override_dir'
-        expDir = args.override_dir
+            'Must set --weights argument if using --exp_dir'
     else:
         assert args.weights is None, \
-            'Cannot use --weights argument without also using --override_dir'
-        expDir = os.path.join(params.exp_dir, args.config,
-                              str(args.run_num))
+            'Cannot use --weights argument without also using --exp_dir'
+        expDir = os.path.join(params.exp_dir, args.config, str(args.run_num))
 
     if not os.path.isdir(expDir):
         os.makedirs(expDir)
 
     params['experiment_dir'] = os.path.abspath(expDir)
-    params['best_checkpoint_path'] = (args.weights if args.override_dir
-            is not None else os.path.join(expDir,
-            'training_checkpoints/best_ckpt.tar'))
+    params['best_checkpoint_path'] = (args.weights if args.exp_dir is not None else os.path.join(expDir, 'training_checkpoints/best_ckpt.tar'))
     params['resuming'] = False
     params['local_rank'] = 0
 
-    logging_utils.log_to_file(logger_name=None,
-                              log_filename=os.path.join(expDir,
-                              'inference_out.log'))
+    logging_utils.log_to_file(logger_name=None, log_filename=os.path.join(expDir, 'inference_out.log'))
     logging_utils.log_versions()
     params.log()
 
@@ -501,10 +498,8 @@ if __name__ == '__main__':
         n_ics = len(ics)
         logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
         # logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
-
-
-
-        
+        # logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")        
+    
     elif params['ics_type'] == 'datetime':
         date_strings = params['date_strings']
         ics = []
@@ -587,10 +582,11 @@ if __name__ == '__main__':
         # Format the date to get the day and month
         date_string = date_object.strftime("%d_%B_%H:%M:%S")
         
-        with open(f"{expDir}/seq_pred_output_{i}_datetime_{date_string}.npy", 'wb') as f:
-            np.save(f, np.squeeze(sp))
-        with open(f"{expDir}/seq_real_output_{i}_datetime_{date_string}.npy", 'wb') as f:
-            np.save(f, np.squeeze(sr)) 
+        # with open(f"{expDir}/seq_pred_output_{i}_datetime_{date_string}.npy", 'wb') as f:
+        #     np.save(f, np.squeeze(sp))
+        # with open(f"{expDir}/seq_real_output_{i}_datetime_{date_string}.npy", 'wb') as f:
+        #     np.save(f, np.squeeze(sr)) 
+
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
 
 
