@@ -128,7 +128,7 @@ def get_base_year(base_path):
     if year_match:
         return int(year_match.group(1))
     else:
-        raise ValueError(f"Invalid base path format: {base_path}")
+        raise ValueError(f"Invalid base path : {base_path}")
 
 
 
@@ -337,7 +337,7 @@ def autoregressive_inference(
     if orography:
         orog = \
             torch.as_tensor(np.expand_dims(np.expand_dims((h5py.File(orography_path,'r')['orog'])[0:720], axis=0),axis=0)).to(device, dtype=torch.float)
-        logging.info('orography loaded; shape:{}'.format(orog.shape))
+        logging.info("orography loaded; shape: {orog.shape}")
 
     # autoregressive inference
 
@@ -417,9 +417,10 @@ def autoregressive_inference(
             if params.log_to_screen:
                 tmp_dict = params["idxes"]
                 idx = tmp_dict[params["fld"]]
-                logging.info('Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i, prediction_length, args.fld, valid_loss[i, idx], acc[i, idx]))
+                logging.info(f'Predicted timestep {i} of {prediction_length}. {args.fld} RMS Error: {valid_loss[i, idx]}, ACC: {acc[i, idx]}')
                 if params.interp > 0:
-                    logging.info('[COARSE] Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i, prediction_length, args.fld, valid_loss_coarse[i, idx], acc_coarse[i, idx]))
+                    logging.info(f'[COARSE] Predicted timestep {i} of {prediction_length}. {args.fld} RMS Error: {valid_loss_coarse[i, idx]}, ACC: {acc_coarse[i, idx]}')
+
 
     seq_real = seq_real.cpu().numpy()
     seq_pred = seq_pred.cpu().numpy()
@@ -553,7 +554,6 @@ if __name__ == '__main__':
             ics = [0]
         n_ics = len(ics)
         logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
-        # logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
         # logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")        
     
     elif params['ics_type'] == 'datetime':
@@ -578,13 +578,11 @@ if __name__ == '__main__':
                 ics.append(int(hours_since_jan_01_epoch / 6))
         n_ics = len(ics)
         logging.warning(f" #### ICS for datetime: {ics} ")
-        logging.warning("Inference for {} initial conditions with ics_type {} : current_date {}  and hours_since_jan_01_epoch  {} ".format(n_ics, params["ics_type"],  date_strings, hours_since_jan_01_epoch ))
+        logging.warning(f"Inference for {n_ics} initial conditions with ics_type {params['ics_type']} : current_date {date_strings} and hours_since_jan_01_epoch {hours_since_jan_01_epoch}")
         logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")
 
 
 
-    # logging.info('Inference for {} initial conditions'.format(n_ics))
-    # logging.warning('\n Listed ics {} initial conditions'.format(ics))
     
     try:
         autoregressive_inference_filetag = params['inference_file_tag']
@@ -630,12 +628,11 @@ if __name__ == '__main__':
         # Format the date to get the day and month
         date_string = date_object.strftime("%d_%B_%H_%Y")
         
-        # with open(f"{expDir}/seq_pred_output_{i}_with_initial_condi_{date_string}.npy", 'wb') as f:
+        # with open(os.path.join(params['experiment_dir'], "seq_pred_output_{i}_datetime_{date_string}.npy"), 'w') as f:
         #     np.save(f, np.squeeze(sp))
-        # with open(f"{expDir}/seq_real_output_{i}_datetime_{date_string}.npy", 'wb') as f:
+        # with open(os.path.join(params['experiment_dir'], "seq_real_output_{i}_datetime_{date_string}.npy"), 'w') as f:
         #     np.save(f, np.squeeze(sr)) 
-
-        logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
+        # logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
 
         if i == 0 or len(valid_loss) == 0:
@@ -666,21 +663,14 @@ if __name__ == '__main__':
     img_shape_y = seq_real[0].shape[3]
 
 
-
-
     # save predictions and loss
     logging.info(f"Shapes: seq_real {seq_real.shape}, seq_pred {seq_pred.shape}, valid_loss {valid_loss.shape}, valid_loss_coarse {valid_loss_coarse.shape}, acc {acc.shape}, acc_coarse {acc_coarse.shape}, acc_coarse_unweighted {acc_coarse_unweighted.shape}, acc_unweighted {acc_unweighted.shape}, acc_land {acc_land.shape}, acc_sea {acc_sea.shape}")
+    logging.info(f"Saving files at {os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')}")
+
+
     # saving acc coreraltion coefficient as a numpy file
-    np.save(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), acc)
-
-
-
-
-
-
-    if params.log_to_screen:
-        logging.info('Saving files at {}'.format(os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')))
-
+    with open(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), 'w') as f:
+        np.save(f, np.squeeze(sr)) 
 
 
 
