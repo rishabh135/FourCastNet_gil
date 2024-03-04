@@ -1,59 +1,34 @@
-# Prof. Tung and Prof. Di,
+## For CCRS projection depending upon the use case
 
-Basemaps plotting 
-check how long it takes top plot
-get the precipitation pretrained afno model
-
-maijda
-
-
-# datetime param, added ics
+# polars: sterographic projection,
+# tropics : mercator
+# 30 N and 30 South is called as Tropics
+# continnent us: lambert conformal
 
 
 
-# meeting with Prof. Tung  Oct 31
+# plot  for the following days z500 and compare it to official era5 cds calls from ecmwf
 
-ECMWF github invitation (only read) for numerical simulation for climate
+# how deep 100 * 4 frames (100 days) 2018 january and 2018 febraury , 2019 januarry 
+# run code for 2017 december 1st and 2018 march 1st  , 2018 june 1st, 2018 september
+# robinson preserves the original distance in highger latitued much better than mercators
 
-Take the course to business  purdue.edu/playtimepractice/paycontractdates/aycontractbi.php
-# Please take the training for FERPA and pass the quiz
-# check how long does it take to run FourcastNet using CPU only on both anvil and gilbreth
-# no slurm material
+# precipitaiton modeling using sfno
 
 
 
 
-# westwood lecture, gis day, allenai monitoriung, dubai ml team MBUZAi, 
+#### February 3
 
-
-
-
-# 7th november
-
-# cropping North american midwest results
-# inference labelling frames with datetime
-# data assimmilation for scaling across more finer scale dataset for climateCx
-
-
-
-# 14th November
-# check n_ics, decorrelation_time,  and why number_of_samples_per_year is different from 1336 to 1460
-# convert to real time output for predicted_frames
-
-
-# 21st November 
-# gradient of pressure can be a good attribution soource in general for weather patterns, any region with high gradient, sea surface level pressure having high gradients quite useful, winds from from dry to wet, certain wave properties change, in physical science high gradient is a cause for interest. Topography, sudden rise and fall, it will influence a lot of air possible being lifeten causing rain, elevation when falls, it becomes dry. 
-# precipitation along the upwind side, just the dry on the downward side.
-
-
-# the tropics have very strong signal, does not mean that most rain which is important is in tropics.  arctics water vapour is radiationally importatnt, arctic amplificatioon, gradient used for calculation matters a lot. standardize 
+# the plots for z500 are of units m2/sec and it around 5 km from surface where we get the z500 values : the range of the values are of order 50,000
+# the code doesn't seem to be normalizing the original netcdf files, whilst there is explicit normalization whiel plotting
+# try to load the grib file and plot the z500 in the same nortpolarsterographic or orthographic projection iwth the ensemble outoput
 
 
 
 
 
+# 9th february
+# get the correct acc values, also get the correct climatorlogy and play around with differnt climatology, log out all the variables in acc caclclation
 
-
-# de normalization of total precipitation from log (1 + tp/e), TP used as a diagnostic variable
-# earth2mip model loading for AFNOnet 
-# loading makani 
+<!-- get robinson plots for each of th e4 esnembles for one days -->
