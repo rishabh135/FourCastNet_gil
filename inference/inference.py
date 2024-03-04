@@ -123,7 +123,7 @@ def plot_time_series(arr, filepath, fld="z500", default_timedelta=6, start_year=
     total_hours = arr.shape[1] * default_timedelta
 
     # Plot the mean values
-    plt.plot(range(0, total_hours, default_timedelta), means, label=f'Mean of {fld} across {total_hours} for start_year {start_year}')
+    plt.plot(range(0, total_hours, default_timedelta), means, label=f'Mean of {fld} across {total_hours} hours for start_year {start_year}')
     
     # Compute the standard error of the mean (sem) at each time point
     sem_vals = sem(arr, axis=0)
@@ -504,7 +504,6 @@ def hours_to_datetime(hours, start_year, default_timedelta=6):
     total_hours = default_timedelta * hours  # Calculate the total hours based on the default time delta
     days, hours = divmod(total_hours, 24)  # Calculate the number of days and remaining hours
 
-    logging.warning(f" starting from 2018  hours {hours} and days {days} ")
     start_date = datetime(start_year, 1, 1, 0, 0, 0)  # Create a datetime object for the start of the year
     date = start_date + timedelta(days= int(days), hours= int(hours))  # Add the calculated days and hours to the start date
 
@@ -580,7 +579,7 @@ if __name__ == '__main__':
     logging_utils.log_versions()
     params.log()
 
-    n_ics = params['n_initial_conditions']
+    # n_ics = params['n_initial_conditions']
 
     if args.fld== 'z500' or args.fld == 't850':
         n_samples_per_year = 1336
@@ -590,7 +589,7 @@ if __name__ == '__main__':
     if params['ics_type'] == 'default':
         num_samples = n_samples_per_year - params.prediction_length
         stop = num_samples
-        ics = np.arange(0, stop, params["DECORRELATION_TIME"])
+        ics = np.arange(0, stop, params["DECORRELATION_TIME"])[:params['n_initial_conditions']]
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
         n_ics = len(ics)
