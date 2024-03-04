@@ -724,7 +724,7 @@ if __name__ == '__main__':
     #     np.save(f, only_fld_acc) 
 
 
-    plot_time_series(only_fld_acc, filepath=os.path.join(params['experiment_dir'], f"plot_acc_var_{args.fld}"),  fld=args.fld)
+    plot_time_series(only_fld_acc, filepath=os.path.join(params['experiment_dir'], f"plot_acc_var_{args.fld}_with_nics_{params['n_initial_conditions']}"),  fld=args.fld)
 
 
 
