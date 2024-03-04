@@ -121,7 +121,7 @@ def plot_time_series(arr, filepath, fld="z500", default_timedelta=6, start_year=
 
     # Compute the total number of hours based on the array shape and default timedelta
     total_hours = arr.shape[1] * default_timedelta
-    
+
     # Plot the mean values
     plt.plot(range(0, total_hours, default_timedelta), means, label=f'Mean of {fld} across {total_hours} for start_year {start_year}')
     
@@ -243,6 +243,8 @@ def setup(params):
     params.means = np.load(params.global_means_path)[0, out_channels]
     params.stds = np.load(params.global_stds_path)[0, out_channels]
 
+    logging.info(f" in_channels  {in_channels} {params['N_in_channels']}   >>   out_channels {out_channels} {params['N_out_channels']}  params.global_means_path {params.global_means_path} params.global_stds_path {params.global_stds_path}  ")
+
     # Load the model based on the network type
     if params.nettype == 'afno':
         model = AFNONet(params).to(device)
@@ -255,17 +257,15 @@ def setup(params):
     model = model.to(device)
 
     # Load the validation data paths
+    logging.info(f" in_channels {params['N_in_channels']}   out_channels {params['N_out_channels']}  params.global_means_path {params.global_means_path} params.global_stds_path {params.global_stds_path}  ")
+
     files_paths = sorted(glob.glob(params.inf_data_path + '/*.h5'))
-    logging.warning(f"Loading validation data {files_paths}")
+    logging.info(f" Loading validation data from {files_paths}")
 
-    # Select the year for inference
+    # Select the year for inference i.e. 2018 for standard case
     yr = 0
-    if params.log_to_screen:
-        logging.info(f'Loading inference data from {files_paths[yr]}')
-
-
     valid_year = get_base_year(files_paths[yr])
-    logging.warning(f" valid_year {valid_year} {type(valid_year)} ")
+    logging.warning(f" valid_year {valid_year}   ")
     # Load the validation data from the selected year
     valid_data_full = h5py.File(files_paths[yr], 'r')['fields']
 
@@ -595,6 +595,7 @@ if __name__ == '__main__':
             ics = [0]
         n_ics = len(ics)
         logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
+        
         # logging.warning(f"{date} {date_obj} {day_of_year} {hour_of_day} {hours_since_jan_01_epoch}")        
     
     elif params['ics_type'] == 'datetime':
@@ -643,6 +644,9 @@ if __name__ == '__main__':
 
     # initialize lists for image sequences and RMSE/ACC
 
+    dates_from_ics = [hours_to_datetime(x, valid_year).strftime("%d_%B_%H_%Y") for x in ics]
+        
+
     valid_loss = []
     valid_loss_coarse = []
     acc_unweighted = []
@@ -658,16 +662,14 @@ if __name__ == '__main__':
     acc_array = np.zeros((36, 41))
     for (i, ic) in enumerate(ics):
         
-        date_object = hours_to_datetime(ics[i], valid_year)
-        logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_object} and valid_year {valid_year}")
+        date_string = dates_from_ics[i]
+        logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_string} and valid_year {valid_year}")
 
 
         # run autoregressive inference for multiple initial conditions
         (sr, sp, vl, a, au, vc, ac, acu, accland, accsea) = autoregressive_inference(params, ic, valid_data_full, model)
 
 
-        # Format the date to get the day and month
-        date_string = date_object.strftime("%d_%B_%H_%Y")
         
         # with open(os.path.join(params['experiment_dir'], "seq_pred_output_{i}_datetime_{date_string}.npy"), 'wb') as f:
         #     np.save(f, np.squeeze(sp))
@@ -723,7 +725,7 @@ if __name__ == '__main__':
     #     np.save(f, only_fld_acc) 
 
 
-    plot_time_series(only_fld_acc, os.path.join(params['experiment_dir'], f"plot_acc_var_{args.fld}"))
+    plot_time_series(only_fld_acc, filepath=os.path.join(params['experiment_dir'], f"plot_acc_var_{args.fld}"),  fld=args.fld)
 
 
 
