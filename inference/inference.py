@@ -85,6 +85,10 @@ from utils.data_loader_multifiles import get_data_loader
 from utils.YParams import YParams
 
 
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import sem
+# from statsmodels.nonparametric.smoothers_lowess import lowess
 
 # def get_base_year(filename):
 #     # extract the year using regular expressions
@@ -108,6 +112,41 @@ from utils.YParams import YParams
 # \d: Matches any single digit
 # ): Ends the capturing group
 # \b: Matches a word boundary (start or end of a word)
+
+
+
+def plot_time_series(arr, filepath, fld="z500", default_timedelta=6, start_year=2018):
+    # Compute the mean across the rows of the time series at each of the total_hours time points
+    means = np.mean(arr, axis=0)
+
+    # Compute the total number of hours based on the array shape and default timedelta
+    total_hours = arr.shape[1] * default_timedelta
+    
+    # Plot the mean values
+    plt.plot(range(0, total_hours, default_timedelta), means, label=f'Mean of {fld} across {total_hours} for start_year {start_year}')
+    
+    # Compute the standard error of the mean (sem) at each time point
+    sem_vals = sem(arr, axis=0)
+    
+    # Plot the 95% confidence interval for the mean values
+    plt.fill_between(range(0, total_hours, default_timedelta), means - 1.96*sem_vals, means + 1.96*sem_vals, alpha=0.2, label='95% CI')
+    
+    # Set the x-axis label with the start time
+    plt.xlabel(f'Number of hours starting from {start_year}')
+    
+    # Set the y-axis label
+    plt.ylabel('Anomaly Correlation Coefficient (ACC) value')
+    
+    # Add a legend to the plot
+    plt.legend()
+    
+    # # Display the plot
+    # plt.show()
+    
+    # Save the plot to a file with the specified filepath and DPI
+    plt.savefig(f"{filepath}.png", dpi=200)
+    return
+
 
 
 
@@ -501,6 +540,10 @@ if __name__ == '__main__':
     params['use_daily_climatology'] = args.use_daily_climatology
     params['global_batch_size'] = params.batch_size
 
+    # important step to index the correct variable from the 20 simulated variable by their index
+    params["idxes"] = {"u10": 0, "z500": 14, "2m_temperature": 2, "v10": 1, "t850": 5}
+
+
     torch.cuda.set_device(0)
     torch.backends.cudnn.benchmark = True
     vis = args.vis
@@ -512,8 +555,6 @@ if __name__ == '__main__':
         params["DECORRELATION_TIME"] = 36  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
     else:
         params["DECORRELATION_TIME"] = 8  # 9 days (36) for z500, 2 (8 steps) days for u10, v10
-    params["idxes"] = {"u10": 0, "z500": 14, "2m_temperature": 2, "v10": 1, "t850": 5}
-
 
 
     # Set up directory
@@ -628,13 +669,13 @@ if __name__ == '__main__':
         # Format the date to get the day and month
         date_string = date_object.strftime("%d_%B_%H_%Y")
         
-        # with open(os.path.join(params['experiment_dir'], "seq_pred_output_{i}_datetime_{date_string}.npy"), 'w') as f:
+        # with open(os.path.join(params['experiment_dir'], "seq_pred_output_{i}_datetime_{date_string}.npy"), 'wb') as f:
         #     np.save(f, np.squeeze(sp))
-        # with open(os.path.join(params['experiment_dir'], "seq_real_output_{i}_datetime_{date_string}.npy"), 'w') as f:
+        # with open(os.path.join(params['experiment_dir'], "seq_real_output_{i}_datetime_{date_string}.npy"), 'wb') as f:
         #     np.save(f, np.squeeze(sr)) 
         # logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
-
+        # concatenate
         if i == 0 or len(valid_loss) == 0:
             seq_real = sr
             seq_pred = sp
@@ -646,7 +687,10 @@ if __name__ == '__main__':
             acc_unweighted = au
             acc_land = accland
             acc_sea = accsea
-        else:  # concatenate
+        
+        else: 
+            # seq_real = np.concatenate((seq_real, sr), 0)
+            # seq_pred = np.concatenate((seq_pred, sp), 0)
             valid_loss = np.concatenate((valid_loss, vl), 0)
             valid_loss_coarse = np.concatenate((valid_loss_coarse, vc),0)
             acc = np.concatenate((acc, a), 0)
@@ -667,12 +711,19 @@ if __name__ == '__main__':
     logging.info(f"Shapes: seq_real {seq_real.shape}, seq_pred {seq_pred.shape}, valid_loss {valid_loss.shape}, valid_loss_coarse {valid_loss_coarse.shape}, acc {acc.shape}, acc_coarse {acc_coarse.shape}, acc_coarse_unweighted {acc_coarse_unweighted.shape}, acc_unweighted {acc_unweighted.shape}, acc_land {acc_land.shape}, acc_sea {acc_sea.shape}")
     logging.info(f"Saving files at {os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')}")
 
+    # saving acc coreraltion only for current fld coefficient as a numpy file
+    idx = params["idxes"][params["fld"]]
+    # Shapes: seq_real (1, 41, 20, 720, 1440), seq_pred (1, 41, 20, 720, 1440), valid_loss (36, 41, 20), valid_loss_coarse (36, 41, 20), acc (36, 41, 20), acc_coarse (36, 41, 20), acc_coarse_unweighted (36, 41, 20), acc_unweighted (36, 41, 20), acc_land (36, 41, 20), acc_sea (36, 41, 20)
 
-    # saving acc coreraltion coefficient as a numpy file
-    with open(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), 'w') as f:
-        np.save(f, np.squeeze(sr)) 
+    only_fld_acc = np.squeeze(acc[:, :, idx])
+    only_fld_rmse = np.squeeze(valid_loss[:, :, idx])
+    logging.warning(f" >>> ONLY_FLD {only_fld_acc.shape}  {only_fld_rmse.shape} ")
+    # saving acc coreraltion only for idx index and for 36 initial conditions, and each condition going 10 days deep coefficient as a numpy file
+    # with open(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), 'wb') as f:
+    #     np.save(f, only_fld_acc) 
 
 
+    plot_time_series(only_fld_acc, os.path.join(params['experiment_dir'], f"plot_acc_var_{args.fld}"))
 
 
 
