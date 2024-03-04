@@ -49,7 +49,7 @@
 import argparse
 import os
 import sys
-import time
+import time, re
 
 import numpy as np
 
@@ -86,23 +86,49 @@ from utils.YParams import YParams
 
 
 
-def get_base_year(filename):
-    # extract the year using regular expressions
-    year = os.path.basename(filename)[:4]
-    # check if the year is a 4-digit number
-    if len(year) == 4 and year.isdigit():
-        print("Year:", year)
-    else:
-        print("Invalid filename format")
-    return year
-
-
-# def get_base_year(base_path):
-#     year_match = re.search(r'\b(19[7-9]\d|20[0-2]\d)\b', os.path.basename(base_path))
-#     if year_match:
-#         return year_match.group(1)
+# def get_base_year(filename):
+#     # extract the year using regular expressions
+#     year = os.path.basename(filename)[:4]
+#     # check if the year is a 4-digit number
+#     if len(year) == 4 and year.isdigit():
+#         print("Year:", year)
 #     else:
-#         raise ValueError(f"Invalid base path format: {base_path}")
+#         print("Invalid filename format")
+#     return year
+# \b: Matches a word boundary (start or end of a word)
+# (: Starts a capturing group
+# 19[7-9]\d: Matches years from 1970 to 1999
+# 19: Matches the literal string "19"
+# [7-9]: Matches a single digit between 7 and 9
+# \d: Matches any single digit
+# |: Alternation (OR) operator
+# 20[0-2]\d: Matches years from 2000 to 2029
+# 20: Matches the literal string "20"
+# [0-2]: Matches a single digit between 0 and 2
+# \d: Matches any single digit
+# ): Ends the capturing group
+# \b: Matches a word boundary (start or end of a word)
+
+
+
+def save_dataset(file, name, data, shape=None, dtype=None):
+    """Helper function to save or overwrite a dataset in an HDF5 file."""
+    try:
+        file.create_dataset(name, data=data, shape=shape, dtype=dtype)
+    except:
+        del file[name]
+        file.create_dataset(name, data=data, shape=shape, dtype=dtype)
+        file[name][...] = data
+
+
+
+
+def get_base_year(base_path):
+    year_match = re.search(r'\b(19[7-9]\d|20[0-2]\d)\b', os.path.basename(base_path))
+    if year_match:
+        return int(year_match.group(1))
+    else:
+        raise ValueError(f"Invalid base path format: {base_path}")
 
 
 
@@ -200,10 +226,12 @@ def setup(params):
 
 
     valid_year = get_base_year(files_paths[yr])
+    logging.warning(f" valid_year {valid_year} {type(valid_year)} ")
     # Load the validation data from the selected year
     valid_data_full = h5py.File(files_paths[yr], 'r')['fields']
 
     return valid_data_full, model, valid_year
+
 
 
 
@@ -220,7 +248,9 @@ def autoregressive_inference(
     device = \
         (torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
          )
-    exp_dir = params['experiment_dir']
+    
+    # exp_dir = params['experiment_dir']
+    
     dt = int(params.dt)
     prediction_length = int(params.prediction_length / dt)
     n_history = params.n_history
@@ -387,14 +417,9 @@ def autoregressive_inference(
             if params.log_to_screen:
                 tmp_dict = params["idxes"]
                 idx = tmp_dict[params["fld"]]
-                logging.info('Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i,
-                             prediction_length, args.fld, valid_loss[i,
-                             idx], acc[i, idx]))
+                logging.info('Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i, prediction_length, args.fld, valid_loss[i, idx], acc[i, idx]))
                 if params.interp > 0:
-                    logging.info('[COARSE] Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i,
-                                 prediction_length, args.fld,
-                                 valid_loss_coarse[i, idx],
-                                 acc_coarse[i, idx]))
+                    logging.info('[COARSE] Predicted timestep {} of {}. {} RMS Error: {}, ACC: {}'.format(i, prediction_length, args.fld, valid_loss_coarse[i, idx], acc_coarse[i, idx]))
 
     seq_real = seq_real.cpu().numpy()
     seq_pred = seq_pred.cpu().numpy()
@@ -436,11 +461,12 @@ def hours_to_datetime(hours, start_year, default_timedelta=6):
     Returns:
         datetime: The datetime object representing the calculated date and time.
     """
-    total_hours = default_timedelta * 6  # Calculate the total hours based on the default time delta
-    days, hours = divmod(hours, 24)  # Calculate the number of days and remaining hours
+    total_hours = default_timedelta * hours  # Calculate the total hours based on the default time delta
+    days, hours = divmod(total_hours, 24)  # Calculate the number of days and remaining hours
 
+    logging.warning(f" starting from 2018  hours {hours} and days {days} ")
     start_date = datetime(start_year, 1, 1, 0, 0, 0)  # Create a datetime object for the start of the year
-    date = start_date + timedelta(days=days, hours=hours)  # Add the calculated days and hours to the start date
+    date = start_date + timedelta(days= int(days), hours= int(hours))  # Add the calculated days and hours to the start date
 
     return date
 
@@ -589,26 +615,16 @@ if __name__ == '__main__':
     acc_land = []
     acc_sea = []
 
-    # run autoregressive inference for multiple initial conditions
 
+    acc_array = np.zeros((36, 41))
     for (i, ic) in enumerate(ics):
         
-        date_object = hours_to_datetime(ics[i], 2018)
-        logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_object}")
-        
-        (
-            sr,
-            sp,
-            vl,
-            a,
-            au,
-            vc,
-            ac,
-            acu,
-            accland,
-            accsea,
-            ) = autoregressive_inference(params, ic, valid_data_full,
-                    model)
+        date_object = hours_to_datetime(ics[i], valid_year)
+        logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_object} and valid_year {valid_year}")
+
+
+        # run autoregressive inference for multiple initial conditions
+        (sr, sp, vl, a, au, vc, ac, acu, accland, accsea) = autoregressive_inference(params, ic, valid_data_full, model)
 
 
         # Format the date to get the day and month
@@ -622,8 +638,6 @@ if __name__ == '__main__':
         logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
 
-
-
         if i == 0 or len(valid_loss) == 0:
             seq_real = sr
             seq_pred = sp
@@ -635,145 +649,69 @@ if __name__ == '__main__':
             acc_unweighted = au
             acc_land = accland
             acc_sea = accsea
-        else:
-
-#        seq_real = np.concatenate((seq_real, sr), 0)
-#        seq_pred = np.concatenate((seq_pred, sp), 0)
-
+        else:  # concatenate
             valid_loss = np.concatenate((valid_loss, vl), 0)
-            valid_loss_coarse = np.concatenate((valid_loss_coarse, vc),
-                    0)
+            valid_loss_coarse = np.concatenate((valid_loss_coarse, vc),0)
             acc = np.concatenate((acc, a), 0)
             acc_coarse = np.concatenate((acc_coarse, ac), 0)
-            acc_coarse_unweighted = \
-                np.concatenate((acc_coarse_unweighted, acu), 0)
+            acc_coarse_unweighted = np.concatenate((acc_coarse_unweighted, acu), 0)
             acc_unweighted = np.concatenate((acc_unweighted, au), 0)
             acc_land = np.concatenate((acc_land, accland), 0)
             acc_sea = np.concatenate((acc_sea, accsea), 0)
+
 
     prediction_length = seq_real[0].shape[0]
     n_out_channels = seq_real[0].shape[1]
     img_shape_x = seq_real[0].shape[2]
     img_shape_y = seq_real[0].shape[3]
 
+
+
+
     # save predictions and loss
+    logging.info(f"Shapes: seq_real {seq_real.shape}, seq_pred {seq_pred.shape}, valid_loss {valid_loss.shape}, valid_loss_coarse {valid_loss_coarse.shape}, acc {acc.shape}, acc_coarse {acc_coarse.shape}, acc_coarse_unweighted {acc_coarse_unweighted.shape}, acc_unweighted {acc_unweighted.shape}, acc_land {acc_land.shape}, acc_sea {acc_sea.shape}")
+    # saving acc coreraltion coefficient as a numpy file
+    np.save(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), acc)
+
+
+
+
+
 
     if params.log_to_screen:
-        logging.info('Saving files at {}'.format(os.path.join(params['experiment_dir'
-                     ], 'autoregressive_predictions'
-                     + autoregressive_inference_filetag + '.h5')))
-    with h5py.File(os.path.join(params['experiment_dir'],
-                   'autoregressive_predictions'
-                   + autoregressive_inference_filetag + '.h5'), 'a') as \
-        f:
+        logging.info('Saving files at {}'.format(os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')))
+
+
+
+
+
+
+    # Open HDF5 file for writing autoregressive predictions and 
+    # Saving the predictions and loss as numpy files
+    with h5py.File(os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5'), 'a') as f:
+        
+        # Save ground truth and predicted sequences if visualization is enabled
         if vis:
-            try:
-                f.create_dataset('ground_truth', data=seq_real,
-                                 shape=(n_ics, prediction_length,
-                                 n_out_channels, img_shape_x,
-                                 img_shape_y), dtype=np.float32)
-            except:
-                del f['ground_truth']
-                f.create_dataset('ground_truth', data=seq_real,
-                                 shape=(n_ics, prediction_length,
-                                 n_out_channels, img_shape_x,
-                                 img_shape_y), dtype=np.float32)
-                f['ground_truth'][...] = seq_real
-
-            try:
-                f.create_dataset('predicted', data=seq_pred,
-                                 shape=(n_ics, prediction_length,
-                                 n_out_channels, img_shape_x,
-                                 img_shape_y), dtype=np.float32)
-            except:
-                del f['predicted']
-                f.create_dataset('predicted', data=seq_pred,
-                                 shape=(n_ics, prediction_length,
-                                 n_out_channels, img_shape_x,
-                                 img_shape_y), dtype=np.float32)
-                f['predicted'][...] = seq_pred
-
+            save_dataset(f, 'ground_truth', seq_real, (n_ics, prediction_length, n_out_channels, img_shape_x, img_shape_y), np.float32)
+            save_dataset(f, 'predicted', seq_pred, (n_ics, prediction_length, n_out_channels, img_shape_x, img_shape_y), np.float32)
+        
+        # Save accuracy metrics for land and sea if masked accuracy is enabled
         if params.masked_acc:
-            try:
-                f.create_dataset('acc_land', data=acc_land)  # , shape = (n_ics, prediction_length, n_out_channels), dtype =np.float32)
-            except:
-                del f['acc_land']
-                f.create_dataset('acc_land', data=acc_land)  # , shape = (n_ics, prediction_length, n_out_channels), dtype =np.float32)
-                f['acc_land'][...] = acc_land
-
-            try:
-                f.create_dataset('acc_sea', data=acc_sea)  # , shape = (n_ics, prediction_length, n_out_channels), dtype =np.float32)
-            except:
-                del f['acc_sea']
-                f.create_dataset('acc_sea', data=acc_sea)  # , shape = (n_ics, prediction_length, n_out_channels), dtype =np.float32)
-                f['acc_sea'][...] = acc_sea
-
-        try:
-            f.create_dataset('rmse', data=valid_loss, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-        except:
-            del f['rmse']
-            f.create_dataset('rmse', data=valid_loss, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-            f['rmse'][...] = valid_loss
-
-        try:
-            f.create_dataset('acc', data=acc, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-        except:
-            del f['acc']
-            f.create_dataset('acc', data=acc, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-            f['acc'][...] = acc
-
-        try:
-            f.create_dataset('rmse_coarse', data=valid_loss_coarse,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-        except:
-            del f['rmse_coarse']
-            f.create_dataset('rmse_coarse', data=valid_loss_coarse,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-            f['rmse_coarse'][...] = valid_loss_coarse
-
-        try:
-            f.create_dataset('acc_coarse', data=acc_coarse,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-        except:
-            del f['acc_coarse']
-            f.create_dataset('acc_coarse', data=acc_coarse,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-            f['acc_coarse'][...] = acc_coarse
-
-        try:
-            f.create_dataset('acc_unweighted', data=acc_unweighted,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-        except:
-            del f['acc_unweighted']
-            f.create_dataset('acc_unweighted', data=acc_unweighted,
-                             shape=(n_ics, prediction_length,
-                             n_out_channels), dtype=np.float32)
-            f['acc_unweighted'][...] = acc_unweighted
-
-        try:
-            f.create_dataset('acc_coarse_unweighted',
-                             data=acc_coarse_unweighted, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-        except:
-            del f['acc_coarse_unweighted']
-            f.create_dataset('acc_coarse_unweighted',
-                             data=acc_coarse_unweighted, shape=(n_ics,
-                             prediction_length, n_out_channels),
-                             dtype=np.float32)
-            f['acc_coarse_unweighted'][...] = acc_coarse_unweighted
-
+            save_dataset(f, 'acc_land', acc_land)
+            save_dataset(f, 'acc_sea', acc_sea)
+        
+        # Save RMSE and accuracy metrics
+        save_dataset(f, 'rmse', valid_loss, (n_ics, prediction_length, n_out_channels), np.float32)
+        save_dataset(f, 'acc', acc, (n_ics, prediction_length, n_out_channels), np.float32)
+        save_dataset(f, 'rmse_coarse', valid_loss_coarse, (n_ics, prediction_length, n_out_channels), np.float32) 
+        save_dataset(f, 'acc_coarse', acc_coarse, (n_ics, prediction_length, n_out_channels), np.float32)
+        save_dataset(f, 'acc_unweighted', acc_unweighted, (n_ics, prediction_length, n_out_channels), np.float32)
+        save_dataset(f, 'acc_coarse_unweighted', acc_coarse_unweighted, (n_ics, prediction_length, n_out_channels), np.float32)
         f.close()
+
+
+
+
+
+
+
