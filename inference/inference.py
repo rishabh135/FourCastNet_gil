@@ -76,7 +76,7 @@ from utils.weighted_acc_rmse import (
 
 logging_utils.config_logger()
 import glob
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import wandb
@@ -402,7 +402,6 @@ def autoregressive_inference(
 
 
 
-from datetime import datetime, timedelta
 
 
 def hours_to_datetime(hours, start_year):
@@ -424,7 +423,7 @@ def hours_to_datetime(hours, start_year):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--run_num', default='00', type=str)
-    parser.add_argument('--yaml_config', default="/scratch/gilbreth/gupt1075/FourCastNet/config/AFNO.yaml", type=str)
+    parser.add_argument('--yaml_config', default="/scratch/gilbreth/gupt1075/FourCastNet_gil/config/AFNO.yaml", type=str)
     
     # defaul full_field vs afno_backbone
     parser.add_argument('--config', default='full_field', type=str)
@@ -468,7 +467,8 @@ if __name__ == '__main__':
     else:
         assert args.weights is None, \
             'Cannot use --weights argument without also using --exp_dir'
-        expDir = os.path.join(params.exp_dir, args.config, str(args.run_num))
+    
+    expDir = os.path.join(args.exp_dir, args.config, str(args.run_num))
 
     if not os.path.isdir(expDir):
         os.makedirs(expDir)
@@ -562,7 +562,10 @@ if __name__ == '__main__':
     # run autoregressive inference for multiple initial conditions
 
     for (i, ic) in enumerate(ics):
-        logging.warning('Initial condition {} of {}'.format(i + 1, n_ics))
+        
+        date_object = hours_to_datetime(ics[i]*6, 2018)
+        logging.warning(f"Initial condition {i+1} of {n_ics} with corresponidng time  =  {date_object}")
+        
         (
             sr,
             sp,
@@ -578,16 +581,15 @@ if __name__ == '__main__':
                     model)
 
 
-        date_object = hours_to_datetime(ics[i], 2018)
         # Format the date to get the day and month
-        date_string = date_object.strftime("%d_%B_%H:%M:%S")
+        date_string = date_object.strftime("%d_%B_%H_%Y")
         
-        # with open(f"{expDir}/seq_pred_output_{i}_datetime_{date_string}.npy", 'wb') as f:
+        # with open(f"{expDir}/seq_pred_output_{i}_with_initial_condi_{date_string}.npy", 'wb') as f:
         #     np.save(f, np.squeeze(sp))
         # with open(f"{expDir}/seq_real_output_{i}_datetime_{date_string}.npy", 'wb') as f:
         #     np.save(f, np.squeeze(sr)) 
 
-        logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} ")
+        logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
 
 
