@@ -64,15 +64,12 @@ conda activate pytorch
 # Change this directory to where you save the model-related files such as run_model.py
 # cd /scratch/gilbreth/wwtung/FourCastNet/
 
-python /scratch/gilbreth/gupt1075/FourCastNet/inference/inference.py \
-       --config='afno_backbone' \
-       --run_num='09' \
-       --weights="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt"  \
-       --override_dir="/scratch/gilbreth/gupt1075/ERA5_expts_dec_u10_trial_40_conditions_5/" \
-       --fld="u10"
-
-
-
+python /scratch/gilbreth/gupt1075/FourCastNet_gil/inference/inference.py \
+       --config="afno_backbone" \
+       --run_num="222" \
+       --fld="z500" \
+       --weights="/scratch/gilbreth/wwtung/FourCastNet/model_weights/FCN_weights_v0/backbone.ckpt"  \
+       --exp_dir="/scratch/gilbreth/gupt1075/ERA5_expts_tutorial/"
 
 
 
