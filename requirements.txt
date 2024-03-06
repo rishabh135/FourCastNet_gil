@@ -1,73 +1,162 @@
-apex @ file:///scratch/gilbreth/gupt1075/extra_dependencies/apex
+aiobotocore==2.7.0
+aiohttp==3.9.1
+aioitertools==0.11.0
+aiosignal==1.3.1
+altair==5.1.2
+apex==0.1
 appdirs==1.4.4
+asciitree==0.3.3
+astunparse==1.6.3
+attrs==23.1.0
+basemap==1.4.1
+basemap-data==1.3.2
+botocore==1.31.64
+Bottleneck==1.3.7
 brotlipy==0.7.0
+Cartopy==0.22.0
 cdsapi==0.6.1
 certifi==2023.7.22
-cffi @ file:///work/ci_py311/cffi_1676822533496/work
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+cffi==1.15.1
+cfgrib==0.9.10.4
+cftime==1.6.3
+charset-normalizer==2.0.4
 click==8.1.7
-contourpy @ file:///work/ci_py311/contourpy_1676827066340/work
-cryptography @ file:///croot/cryptography_1694444244250/work
-cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+cloudpickle==3.0.0
+contourpy==1.0.5
+cryptography==41.0.3
+cycler==0.11.0
+dask==2023.11.0
+distributed==2023.11.0
+dm-tree==0.1.8
 docker-pycreds==0.4.0
+duckdb==0.9.2
+eccodes==1.6.1
 ecmwf-api-client==1.6.3
+ecmwflibs==0.5.7
 einops==0.6.1
-filelock @ file:///work/ci_py311/filelock_1676823024085/work
+fasteners==0.19
+filelock==3.9.0
+findlibs==0.0.5
 fonttools==4.25.0
-fsspec==2023.9.1
+frozenlist==1.4.0
+fsspec==2023.10.0
+gast==0.5.4
+geographiclib==2.0
+geopy==2.4.1
+gif==23.3.0
 gitdb==4.0.10
 GitPython==3.1.36
-gmpy2 @ file:///work/ci_py311/gmpy2_1676839849213/work
-h5py @ file:///croot/h5py_1691589708553/work
+gmpy2==2.1.2
+h5netcdf==1.3.0
+h5py==3.9.0
 huggingface-hub==0.17.2
-idna @ file:///work/ci_py311/idna_1676822698822/work
-Jinja2 @ file:///work/ci_py311/jinja2_1676823587943/work
-kiwisolver @ file:///work/ci_py311/kiwisolver_1676827230232/work
-MarkupSafe @ file:///work/ci_py311/markupsafe_1676823507015/work
+idna==3.4
+importlib-metadata==6.8.0
+iniconfig==2.0.0
+Jinja2==3.1.2
+jmespath==1.0.1
+joblib==1.3.2
+jsonschema==4.20.0
+jsonschema-specifications==2023.11.1
+kiwisolver==1.4.4
+llvmlite==0.41.1
+locket==1.0.0
+LovelyPlots==0.0.27
+MarkupSafe==2.1.1
 matplotlib==3.8.0
-mkl-fft @ file:///croot/mkl_fft_1695058164594/work
-mkl-random @ file:///croot/mkl_random_1695059800811/work
+mkl-fft==1.3.8
+mkl-random==1.2.4
 mkl-service==2.4.0
-mpmath @ file:///croot/mpmath_1690848262763/work
+mpmath==1.3.0
+msgpack==1.0.7
+multidict==6.0.4
 munkres==1.1.4
 mypy==1.6.0
 mypy-extensions==1.0.0
-networkx @ file:///croot/networkx_1690561992265/work
-numpy @ file:///croot/numpy_and_numpy_base_1691091611330/work
-packaging @ file:///croot/packaging_1693575174725/work
+netCDF4==1.6.5
+networkx==3.1
+numba==0.58.1
+numcodecs==0.12.1
+numpy==1.24.4
+nvidia-dali-cuda110==1.30.0
+nvidia-modulus==0.5.0
+nvtx==0.2.10
+opencv-python==4.8.1.78
+packaging==23.1
+pandas==2.1.3
+partd==1.4.1
 pathtools==0.1.2
-Pillow @ file:///croot/pillow_1695134008276/work
+Pillow==9.4.0
+pip==23.2.1
+pluggy==1.3.0
 ply==3.11
+polars==0.20.5
+properscoring==0.1
 protobuf==4.24.3
 psutil==5.9.5
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
-pyOpenSSL @ file:///croot/pyopenssl_1690223430423/work
-pyparsing @ file:///work/ci_py311/pyparsing_1677811559502/work
+py4j==0.10.9.7
+pycparser==2.21
+pydantic==1.10.11
+pygrib==2.1.5
+pyOpenSSL==23.2.0
+pyparsing==3.0.9
+pyproj==3.6.1
 PyQt5-sip==12.11.0
-PySocks @ file:///work/ci_py311/pysocks_1676822712504/work
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pyshp==2.3.1
+PySocks==1.7.1
+pyspark==3.5.0
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-regtest==1.5.1
+python-dateutil==2.8.2
+python-dotenv==1.0.0
+pytz==2023.3.post1
 PyYAML==6.0.1
-requests @ file:///croot/requests_1690400202158/work
+referencing==0.31.0
+requests==2.31.0
+rpds-py==0.13.1
 ruamel.yaml==0.17.32
 ruamel.yaml.clib==0.2.7
+s3fs==2023.10.0
 safetensors==0.3.3
+scikit-learn==1.3.2
 scipy==1.11.3
+seaborn==0.13.0
 sentry-sdk==1.31.0
 setproctitle==1.3.2
-sip @ file:///work/ci_py311/sip_1676825117084/work
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+setuptools==68.0.0
+shapely==2.0.2
+sip==6.6.2
+six==1.16.0
 smmap==5.0.1
-sympy @ file:///work/ci_py311_2/sympy_1679339311852/work
+sortedcontainers==2.4.0
+sympy==1.11.1
+tblib==3.0.0
+threadpoolctl==3.2.0
 timm==0.9.7
-toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+toml==0.10.2
+toolz==0.12.0
 torch==2.0.1
+torch-harmonics==0.6.3
 torchaudio==2.0.2
 torchinfo==1.8.0
 torchsummary==1.5.1
 torchvision==0.15.2
-tornado @ file:///croot/tornado_1690848263220/work
+tornado==6.3.2
 tqdm==4.66.1
+treelib==1.7.0
 triton==2.0.0
-typing_extensions @ file:///croot/typing_extensions_1690297465030/work
-urllib3 @ file:///croot/urllib3_1686163155763/work
+typer==0.9.0
+typing_extensions==4.7.1
+tzdata==2023.3
+urllib3==1.26.16
 wandb==0.15.10
+wheel==0.38.4
+wrapt==1.16.0
+xarray==2023.11.0
+xhistogram==0.3.2
+xskillscore==0.0.24
+yarl==1.9.3
+zarr==2.16.1
+zict==3.0.0
+zipp==3.17.0
