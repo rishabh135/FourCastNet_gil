@@ -57,6 +57,20 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
 import logging
 from collections import OrderedDict
 
+
+
+
+import sys
+username="gupt1075"
+
+
+if (f"/home/{username}/FourCastNet_gil" not in sys.path):
+    sys.path.append(f"/home/{username}/FourCastNet_gil")
+
+# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
+sys.path.append(f"/home/{username}/FourCastNet_gil")
+
+
 import h5py
 import torch
 import torch.cuda.amp as amp
