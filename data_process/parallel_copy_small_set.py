@@ -106,64 +106,64 @@ def writetofile(src, dest, channel_idx, varslist, src_idx=0, frmt='nc'):
             mins = (ttot - 3600*hrs)//60
             secs = (ttot - 3600*hrs - 60*mins)
             channel_idx += 1 
-filestr = 'oct_2021_19_31'
-dest = '/global/cscratch1/sd/jpathak/21var/oct_2021_19_21.h5'
+filestr = '2020'
+dest = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020.nc'
 
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_sfc.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_sfc.nc'
 #u10 v10 t2m
 writetofile(src, dest, 0, ['u10'])
 writetofile(src, dest, 1, ['v10'])
 writetofile(src, dest, 2, ['t2m'])
 
 #sp mslp
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_sfc.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_sfc.nc'
 writetofile(src, dest, 3, ['sp'])
 writetofile(src, dest, 4, ['msl'])
 
 #t850
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 5, ['t'], 2)
 
 #uvz1000
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 6, ['u'], 3)
 writetofile(src, dest, 7, ['v'], 3)
 writetofile(src, dest, 8, ['z'], 3)
 
 #uvz850
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 9, ['u'], 2)
 writetofile(src, dest, 10, ['v'], 2)
 writetofile(src, dest, 11, ['z'], 2)
 
 #uvz 500
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 12, ['u'], 1)
 writetofile(src, dest, 13, ['v'], 1)
 writetofile(src, dest, 14, ['z'], 1)
 
 #t500
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 15, ['t'], 1)
 
 #z50
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 16, ['z'], 0)
 
 #r500 
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 17, ['r'], 1)
 
 #r850
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_pl.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_pl.nc'
 writetofile(src, dest, 18, ['r'], 2)
 
 #tcwv
-src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_sfc.nc'
+src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_sfc.nc'
 writetofile(src, dest, 19, ['tcwv'])
 
 #sst
-#src = '/project/projectdirs/dasrepo/ERA5/oct_2021_19_31_sfc.nc'
+#src = '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_sfc.nc'
 #writetofile(src, dest, 20, ['sst'])
 
 

@@ -1,74 +1,19 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# BSD 3-Clause License
-#
-# Copyright (c) 2022, FourCastNet authors
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-#   list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#   this list of conditions and the following disclaimer in the documentation
-#   and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# The code was authored by the following people:
-#
-# Jaideep Pathak - NVIDIA Corporation
-# Shashank Subramanian - NERSC, Lawrence Berkeley National Laboratory
-# Peter Harrington - NERSC, Lawrence Berkeley National Laboratory
-# Sanjeev Raja - NERSC, Lawrence Berkeley National Laboratory
-# Ashesh Chattopadhyay - Rice University
-# Morteza Mardani - NVIDIA Corporation
-# Thorsten Kurth - NVIDIA Corporation
-# David Hall - NVIDIA Corporation
-# Zongyi Li - California Institute of Technology, NVIDIA Corporation
-# Kamyar Azizzadenesheli - Purdue University
-# Pedram Hassanzadeh - Rice University
-# Karthik Kashinath - NVIDIA Corporation
-# Animashree Anandkumar - California Institute of Technology, NVIDIA Corporation
-
 import argparse
 import os
 import sys
 import time, re
-
 import numpy as np
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
 import logging
 from collections import OrderedDict
 
 
-
-
-import sys
 username="gupt1075"
-
-
+# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
 if (f"/home/{username}/FourCastNet_gil" not in sys.path):
     sys.path.append(f"/home/{username}/FourCastNet_gil")
 
-# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
-sys.path.append(f"/home/{username}/FourCastNet_gil")
+
+
 
 
 import h5py
@@ -80,15 +25,14 @@ import torchvision
 from numpy.core.numeric import False_
 from torch.nn.parallel import DistributedDataParallel
 from torchvision.utils import save_image
-from utils import logging_utils
-from utils.weighted_acc_rmse import (
-    unweighted_acc_torch_channels,
-    weighted_acc_masked_torch_channels,
-    weighted_acc_torch_channels,
-    weighted_rmse_torch_channels,
-)
+# from utils import logging_utils
+# from utils.weighted_acc_rmse import (
+#     unweighted_acc_torch_channels,
+#     weighted_acc_masked_torch_channels,
+#     weighted_acc_torch_channels,
+#     weighted_rmse_torch_channels,
+# )
 
-logging_utils.config_logger()
 import glob
 from datetime import datetime, timedelta
 
@@ -97,35 +41,26 @@ import wandb
 from networks.afnonet import AFNONet
 from utils.data_loader_multifiles import get_data_loader
 from utils.YParams import YParams
-
-
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import sem
-# from statsmodels.nonparametric.smoothers_lowess import lowess
 
-# def get_base_year(filename):
-#     # extract the year using regular expressions
-#     year = os.path.basename(filename)[:4]
-#     # check if the year is a 4-digit number
-#     if len(year) == 4 and year.isdigit():
-#         print("Year:", year)
-#     else:
-#         print("Invalid filename format")
-#     return year
-# \b: Matches a word boundary (start or end of a word)
-# (: Starts a capturing group
-# 19[7-9]\d: Matches years from 1970 to 1999
-# 19: Matches the literal string "19"
-# [7-9]: Matches a single digit between 7 and 9
-# \d: Matches any single digit
-# |: Alternation (OR) operator
-# 20[0-2]\d: Matches years from 2000 to 2029
-# 20: Matches the literal string "20"
-# [0-2]: Matches a single digit between 0 and 2
-# \d: Matches any single digit
-# ): Ends the capturing group
-# \b: Matches a word boundary (start or end of a word)
+
+
+from torchinfo import summary
+
+
+
+# out_sum = summary(model, input_data=[initial_time, x], dtypes=[datetime, torch.long], mode="train", col_names=['input_size', 'output_size', 'num_params', 'trainable'], row_settings=['var_names'], depth=4)
+# logging.warning(" >> MODEL_summary: {} \n".format(out_sum))
+
+
+def save_dataset(file, name, data, shape=None, dtype=None):
+    """Helper function to save or overwrite a dataset in an HDF5 file."""
+    try:
+        file.create_dataset(name, data=data, shape=shape, dtype=dtype)
+    except:
+        del file[name]
+        file.create_dataset(name, data=data, shape=shape, dtype=dtype)
+        file[name][...] = data
 
 
 
