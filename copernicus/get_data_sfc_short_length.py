@@ -33,6 +33,6 @@ c.retrieve(
                 ],
         'time': [ '00:00', '06:00', '12:00','18:00',],  
     },
-    '/scratch/gilbreth/wwtung/FourCastNet/data/out_of_sample/2020_sfc.nc')
+    '/scratch/gilbreth/gupt1075/copernicus_data/2020_sfc.nc')
 
 
