@@ -4,13 +4,14 @@ import sys
 import time, re
 import numpy as np
 import logging
+from datetime import datetime, timedelta
 from collections import OrderedDict
 
 
 username="gupt1075"
-# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
-if (f"/home/{username}/FourCastNet_gil" not in sys.path):
-    sys.path.append(f"/home/{username}/FourCastNet_gil")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
+# if (f"/home/{username}/FourCastNet_gil" not in sys.path):
+#     sys.path.append(f"/home/{username}/FourCastNet_gil")
 
 
 
@@ -25,13 +26,13 @@ import torchvision
 from numpy.core.numeric import False_
 from torch.nn.parallel import DistributedDataParallel
 from torchvision.utils import save_image
-# from utils import logging_utils
-# from utils.weighted_acc_rmse import (
-#     unweighted_acc_torch_channels,
-#     weighted_acc_masked_torch_channels,
-#     weighted_acc_torch_channels,
-#     weighted_rmse_torch_channels,
-# )
+from utils import logging_utils
+from utils.weighted_acc_rmse import (
+    unweighted_acc_torch_channels,
+    weighted_acc_masked_torch_channels,
+    weighted_acc_torch_channels,
+    weighted_rmse_torch_channels,
+)
 
 import glob
 from datetime import datetime, timedelta
@@ -49,8 +50,6 @@ from torchinfo import summary
 
 
 
-# out_sum = summary(model, input_data=[initial_time, x], dtypes=[datetime, torch.long], mode="train", col_names=['input_size', 'output_size', 'num_params', 'trainable'], row_settings=['var_names'], depth=4)
-# logging.warning(" >> MODEL_summary: {} \n".format(out_sum))
 
 
 def save_dataset(file, name, data, shape=None, dtype=None):
@@ -333,6 +332,10 @@ def autoregressive_inference(
         logging.info('Begin autoregressive inference')
 
     with torch.no_grad():
+        
+        # out_sum = summary(model, input_data=[ valid_data[0:n_history + 1]],  mode="eval", col_names=['input_size', 'output_size', 'num_params', 'trainable'], row_settings=['var_names'], depth=4)
+        # logging.warning(" >> MODEL_summary: {} \n".format(out_sum))
+        
         for i in range(valid_data.shape[0]):
             if i == 0:  # start of sequence
                 first = valid_data[0:n_history + 1]
@@ -524,7 +527,12 @@ if __name__ == '__main__':
     params['resuming'] = False
     params['local_rank'] = 0
 
-    logging_utils.log_to_file(logger_name=None, log_filename=os.path.join(expDir, 'inference_out.log'))
+    # Get the current date and time
+    now = datetime.now()
+
+    # Format the date to get the day and month
+    day_month = now.strftime("%B_%d_")
+    logging_utils.log_to_file(logger_name=None, log_filename=os.path.join(expDir, f'FourCastNet_inference_{day_month}.log'))
     logging_utils.log_versions()
     params.log()
 
@@ -607,7 +615,6 @@ if __name__ == '__main__':
     acc_sea = []
 
 
-    acc_array = np.zeros((36, 41))
     for (i, ic) in enumerate(ics):
         
         date_string = dates_from_ics[i]
@@ -618,12 +625,15 @@ if __name__ == '__main__':
         (sr, sp, vl, a, au, vc, ac, acu, accland, accsea) = autoregressive_inference(params, ic, valid_data_full, model)
 
 
-        
-        # with open(os.path.join(params['experiment_dir'], "seq_pred_output_{i}_datetime_{date_string}.npy"), 'wb') as f:
-        #     np.save(f, np.squeeze(sp))
-        # with open(os.path.join(params['experiment_dir'], "seq_real_output_{i}_datetime_{date_string}.npy"), 'wb') as f:
-        #     np.save(f, np.squeeze(sr)) 
-        # logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
+        save_pp = os.path.join(params['experiment_dir'], f"seq_pred_{i}_datetime_{date_string}.npy")
+        logging.warning(f" >>> saving predicted {save_pp} ")
+        with open( save_pp, 'wb') as f:
+            np.save(f, np.squeeze(sp))
+        save_pp = os.path.join(params['experiment_dir'], f"seq_real_{i}_datetime_{date_string}.npy")
+        with open(save_pp, 'wb') as f:
+            np.save(f, np.squeeze(sr))
+        logging.warning(f" >>> saving original {save_pp} ")
+        logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
         # concatenate
         if i == 0 or len(valid_loss) == 0:
