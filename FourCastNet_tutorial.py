@@ -21,7 +21,7 @@ import logging
 from collections import OrderedDict
 
 
-username="wwtung"
+username="gupt1075"
 # sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/../')
 if (f"/home/{username}/FourCastNet_gil" not in sys.path):
     sys.path.append(f"/home/{username}/FourCastNet_gil")
@@ -514,7 +514,7 @@ def main(args):
         ics = np.arange(0, stop, params["DECORRELATION_TIME"])
         logging.warning(f' stop: {stop}.   params["DECORRELATION_TIME"] : {params["DECORRELATION_TIME"]}   initial_conditions: {params["n_initial_conditions"]} \n ICS: {ics} ')
         ics = ics[:params["n_initial_conditions"]]
-
+        ics = [100,101,102,103]
         n_ics = len(ics)
         logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
         
@@ -678,7 +678,7 @@ def main(args):
 #########
 
 
-username = "wwtung"
+username = "gupt1075"
 parser = argparse.ArgumentParser()
 parser.add_argument('-f')
 parser.add_argument('--run_num', default='222', type=str)
