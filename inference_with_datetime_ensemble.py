@@ -487,7 +487,7 @@ def save_numpy_files(data_dict, output_dir='.'):
     """Save each value in the dictionary as a separate numpy file with the corresponding datetime object's name."""
     for key, value in data_dict.items():
         # logging.warning(f"  Key:  {key}  value->  {value.shape}  ")
-        filename = f"ensemble_output_date_{key.strftime('%d_%B_%Y')}_ensemble_number_{value.shape[0]}.npy"
+        filename = f"{key.strftime('%Y_%B_%d_%H')}.npy"
         np.save(os.path.join(output_dir, filename), value)
 
 
