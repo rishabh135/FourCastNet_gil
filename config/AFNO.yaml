@@ -7,7 +7,7 @@ full_field: &FULL_FIELD
   dt: 1 # how many timesteps ahead the model will predict
   n_history: 0 #how many previous timesteps to consider
   prediction_type: 'iterative'
-  prediction_length: 16 
+  prediction_length: 8 
   n_initial_conditions: 10 #applicable only if prediction_type == 'iterative'
   
   ics_type: "default" #ics_type: "default"

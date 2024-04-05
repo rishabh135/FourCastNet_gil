@@ -69,7 +69,7 @@ def get_datelist(start_dt, end_dt, default_timedelta=6):
         datetimes.append(current_datetime)
         current_datetime += timedelta(hours=default_timedelta)
     
-    return datetimes
+    return datetimes[1:]
 
 def save_dataset(file, name, data, shape=None, dtype=None):
     """Helper function to save or overwrite a dataset in an HDF5 file."""
