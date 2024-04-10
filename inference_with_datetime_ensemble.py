@@ -505,8 +505,8 @@ if __name__ == '__main__':
     parser.add_argument('--exp_dir', default=None, type=str, help='Path to store inference outputs; must also set --weights arg')
     parser.add_argument('--interp', default=0, type=float)
     parser.add_argument('--weights', default="/scratch/gilbreth/gupt1075/model_weights/FCN_weights_v0/backbone.ckpt", type=str, help='Path to model weights, for use with exp_dir option')
-    parser.add_argument('--start_ics_frame', default=120, type=int)
-    parser.add_argument('--end_ics_frame', default=125, type=int)
+    parser.add_argument('--start_ics_frame', default=140, type=int)
+    parser.add_argument('--end_ics_frame', default=145, type=int)
 
 
     args = parser.parse_args()
