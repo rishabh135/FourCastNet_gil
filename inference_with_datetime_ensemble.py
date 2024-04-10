@@ -781,4 +781,4 @@ if __name__ == '__main__':
 
 
 
-#  CUDA_VISIBLE_DEVICES=0 python /scratch/gilbreth/gupt1075/FourCastNet_gil/inference_with_datetime_ensemble.py        --config="afno_backbone"        --run_num="222"        --fld="z500"        --weights="/scratch/gilbreth/wwtung/FourCastNet/model_weights/FCN_weights_v0/backbone.ckpt"         --exp_dir="/scratch/gilbreth/gupt1075/ERA5_ensemble_feb_1"
+#  CUDA_VISIBLE_DEVICES=0 python /scratch/gilbreth/gupt1075/FourCastNet_gil/inference_with_datetime_ensemble.py   --config="afno_backbone"    --run_num="222"  --fld="z500"  --weights="/scratch/gilbreth/wwtung/FourCastNet/model_weights/FCN_weights_v0/backbone.ckpt"  --exp_dir="/scratch/gilbreth/gupt1075/ERA5_ensemble_March_20"  --start_ics_frame=320 --end_ics_frame=325
