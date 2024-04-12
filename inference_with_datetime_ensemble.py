@@ -496,7 +496,7 @@ def store_lagged_ensemble_in_h5(data_dict: dict, input_ics_dates: dict, output_d
 
     for key, value in data_dict.items():
         logging.warning(f"  Key:  {key}  value->  {value.shape}   input_ic_dates: {input_ics_dates[key]} \n")
-        filename = f"{key.strftime('%Y_%B_%d_%H')}.h5"
+        filename = f"{output_dir}/{key.strftime('%Y_%B_%d_%H')}.h5"
 
         with h5py.File(filename, "w") as f:
             f.create_dataset("arr1", data=value)
