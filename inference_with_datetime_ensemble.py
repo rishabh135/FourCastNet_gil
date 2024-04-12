@@ -483,6 +483,29 @@ def hours_to_datetime(hours, start_year, default_timedelta=6):
 
 
 
+def store_lagged_ensemble_in_h5(data_dict: dict, input_ics_dates: dict, output_dir="" ):
+    """
+    Stores a numpy array and a list of datetime objects as strings in an HDF5 file.
+
+    Args:
+        arr1 (numpy.ndarray): The first NumPy array to be stored.
+        arr2 (numpy.ndarray): The second NumPy array to be stored.
+        datetime_objects (list): A list of datetime objects to be stored as strings.
+        filename (str): The name of the HDF5 file to be created.
+    """
+
+    for key, value in data_dict.items():
+        logging.warning(f"  Key:  {key}  value->  {value.shape}   input_ic_dates: {input_ics_dates[key]} \n")
+        filename = f"{key.strftime('%Y_%B_%d_%H')}.h5"
+
+        with h5py.File(filename, "w") as f:
+            f.create_dataset("arr1", data=value)
+            # Convert datetime objects to strings and store them
+            datetime_strings = [ dt.encode() for dt in input_ics_dates[key]]
+            f.create_dataset("input_ics", data=datetime_strings)
+    return
+
+
 def save_numpy_files(data_dict, output_dir='.'):
     """Save each value in the dictionary as a separate numpy file with the corresponding datetime object's name."""
     for key, value in data_dict.items():
@@ -576,8 +599,10 @@ if __name__ == '__main__':
         ics = np.arange(0, stop, params["DECORRELATION_TIME"])[:params['n_initial_conditions']]
         if vis:  # visualization for just the first ic (or any ic)
             ics = [0]
-        #  adding explicit frames for test case
+        
+        #  adding explicit frames for test case for lagged_ensemble 
         ics = np.arange(args.start_ics_frame, args.end_ics_frame+1, 1)
+        
         n_ics = len(ics)
         logging.warning(f" \n ICS for default: {ics} num_samples {num_samples}  prediction_lnegth: {params.prediction_length}   ")
         
@@ -644,7 +669,7 @@ if __name__ == '__main__':
     acc_sea = []
 
     output_ensemble_based_on_datetime = {}
-    
+    output_ensemble_ics = {}
 
     
 
@@ -671,12 +696,13 @@ if __name__ == '__main__':
         for idx, date in enumerate(prediction_date_list):
             if date in output_ensemble_based_on_datetime:
                 logging.warning(f" >>> date {date} already in dict, appending to existing array with shape {output_ensemble_based_on_datetime[date].shape} ")
-            
+        
                 output_ensemble_based_on_datetime[date] = np.concatenate((output_ensemble_based_on_datetime[date], sp[0:1, idx]), axis=0)
-            
+                output_ensemble_ics[date].append(start_ics_date.isoformat())    
             else:
                 logging.warning(f" >>> date {date} not in dict, creating new array with shape {sp[0:1, idx].shape} ")
                 output_ensemble_based_on_datetime[date] = sp[0:1, idx]
+                output_ensemble_ics[date] = [start_ics_date.isoformat()]
 
         
 
@@ -748,9 +774,10 @@ if __name__ == '__main__':
 
     # save_path = os.path.join(params['experiment_dir'], f"ensemble_output_start_date_{dates_from_ics[0].strftime('%d_%B_%Y')}_{prediction_length}.hdf5")
         
-    save_numpy_files(output_ensemble_based_on_datetime, output_dir= params['experiment_dir'])
-
-    # Open HDF5 file for writing autoregressive predictions and 
+    # save_numpy_files(output_ensemble_based_on_datetime, output_dir= params['experiment_dir'])
+    store_lagged_ensemble_in_h5( output_ensemble_based_on_datetime, output_ensemble_ics, output_dir= params['experiment_dir'])
+    
+    
     # Saving the predictions and loss as numpy files
     with h5py.File(os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5'), 'a') as f:
         
