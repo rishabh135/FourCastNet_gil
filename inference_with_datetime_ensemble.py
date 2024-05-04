@@ -495,9 +495,10 @@ def store_lagged_ensemble_in_h5(data_dict: dict, input_ics_dates: dict, output_d
     """
 
     for key, value in data_dict.items():
-        logging.warning(f"  Key:  {key}  value->  {value.shape}   input_ic_dates: {input_ics_dates[key]} \n")
         filename = f"{output_dir}/{key.strftime('%Y_%B_%d_%H')}.h5"
 
+        logging.warning(f"  Key:  {key}  value->  {value.shape}  filename:{filename}  input_ic_dates: {input_ics_dates[key]} \n")
+        
         with h5py.File(filename, "w") as f:
             f.create_dataset("arr1", data=value)
             # Convert datetime objects to strings and store them
@@ -506,12 +507,12 @@ def store_lagged_ensemble_in_h5(data_dict: dict, input_ics_dates: dict, output_d
     return
 
 
-def save_numpy_files(data_dict, output_dir='.'):
-    """Save each value in the dictionary as a separate numpy file with the corresponding datetime object's name."""
-    for key, value in data_dict.items():
-        # logging.warning(f"  Key:  {key}  value->  {value.shape}  ")
-        filename = f"{key.strftime('%Y_%B_%d_%H')}.npy"
-        np.save(os.path.join(output_dir, filename), value)
+# def save_numpy_files(data_dict, output_dir='.'):
+#     """Save each value in the dictionary as a separate numpy file with the corresponding datetime object's name."""
+#     for key, value in data_dict.items():
+#         # logging.warning(f"  Key:  {key}  value->  {value.shape}  ")
+#         filename = f"{key.strftime('%Y_%B_%d_%H')}.npy"
+#         np.save(os.path.join(output_dir, filename), value)
 
 
 if __name__ == '__main__':
@@ -691,16 +692,16 @@ if __name__ == '__main__':
         end_ics_date = start_ics_date + timedelta(hours = (sr[0].shape[0]) * 6 ) 
         logging.warning(f" >>> start_ics_date {start_ics_date}  sr_shape {sr[0].shape[0]} sr[-1].shape[0] {sr[-1].shape[0]}  end_ics_date {end_ics_date} ")
         prediction_date_list = get_datelist(start_ics_date, end_ics_date, 6)
-        logging.warning(f" >>> date_list {prediction_date_list}  >>> sp_shape {sp.shape} ")
+        # logging.warning(f" >>> date_list {prediction_date_list}  >>> sp_shape {sp.shape} ")
 
         for idx, date in enumerate(prediction_date_list):
             if date in output_ensemble_based_on_datetime:
-                logging.warning(f" >>> date {date} already in dict, appending to existing array with shape {output_ensemble_based_on_datetime[date].shape} ")
+                # logging.warning(f" >>> date {date} already in dict, appending to existing array with shape {output_ensemble_based_on_datetime[date].shape} ")
         
                 output_ensemble_based_on_datetime[date] = np.concatenate((output_ensemble_based_on_datetime[date], sp[0:1, idx]), axis=0)
                 output_ensemble_ics[date].append(start_ics_date.isoformat())    
             else:
-                logging.warning(f" >>> date {date} not in dict, creating new array with shape {sp[0:1, idx].shape} ")
+                # logging.warning(f" >>> date {date} not in dict, creating new array with shape {sp[0:1, idx].shape} ")
                 output_ensemble_based_on_datetime[date] = sp[0:1, idx]
                 output_ensemble_ics[date] = [start_ics_date.isoformat()]
 
@@ -716,7 +717,7 @@ if __name__ == '__main__':
         
         
         # logging.warning(f" >>> saving original {save_pp} ")
-        logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
+        # logging.warning(f" saved real and predicted with shape {sp.shape} {sr.shape} with np_save {date_string} ")
 
         # concatenate
         if i == 0 or len(valid_loss) == 0:
@@ -749,13 +750,10 @@ if __name__ == '__main__':
     img_shape_x = seq_real[0].shape[2]
     img_shape_y = seq_real[0].shape[3]
 
-    for key, value in output_ensemble_based_on_datetime.items():
-        logging.warning(f" $$$$  Date:  {key}  value->  {value.shape}  ")
-
 
     # save predictions and loss
-    logging.info(f"Shapes: seq_real {seq_real.shape}, seq_pred {seq_pred.shape}, valid_loss {valid_loss.shape}, valid_loss_coarse {valid_loss_coarse.shape}, acc {acc.shape}, acc_coarse {acc_coarse.shape}, acc_coarse_unweighted {acc_coarse_unweighted.shape}, acc_unweighted {acc_unweighted.shape}, acc_land {acc_land.shape}, acc_sea {acc_sea.shape}")
-    logging.info(f"Saving files at {os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')}")
+    # logging.info(f"Shapes: seq_real {seq_real.shape}, seq_pred {seq_pred.shape}, valid_loss {valid_loss.shape}, valid_loss_coarse {valid_loss_coarse.shape}, acc {acc.shape}, acc_coarse {acc_coarse.shape}, acc_coarse_unweighted {acc_coarse_unweighted.shape}, acc_unweighted {acc_unweighted.shape}, acc_land {acc_land.shape}, acc_sea {acc_sea.shape}")
+    # logging.info(f"Saving files at {os.path.join(params['experiment_dir'], 'autoregressive_predictions' + autoregressive_inference_filetag + '.h5')}")
 
     # saving acc coreraltion only for current fld coefficient as a numpy file
     idx = params["idxes"][params["fld"]]
@@ -763,6 +761,8 @@ if __name__ == '__main__':
 
     only_fld_acc = np.squeeze(acc[:, :, idx])
     only_fld_rmse = np.squeeze(valid_loss[:, :, idx])
+    
+    
     logging.warning(f" >>> ONLY_FLD {only_fld_acc.shape}  {only_fld_rmse.shape} ")
     # saving acc coreraltion only for idx index and for 36 initial conditions, and each condition going 10 days deep coefficient as a numpy file
     # with open(os.path.join(params['experiment_dir'], f"acc_{args.fld}.npy"), 'wb') as f:
